@@ -77,7 +77,13 @@ struct Constants {
 
     float turn_cutoff = 20; // Degrees, that within, slew will stop being applied.
     float drive_cutoff = 7; // Inches, that within, slew will stop being applied and heading correction stops.
-}; 
+
+    // Constants for cheesy/curvature drive
+    float cd_turn_nonlinearity = 0.65f; // Controls sinusoidal turn remapping depth.
+    float cd_neg_inertia_scalar = 4.0f; // Scales the negative inertia effect.
+    float cd_sensitivity = 0.65f;       // Scales overall angular output when driving forward.
+    float cd_slew = 0.1f;               // Max throttle change per 5ms loop iteration (0-1 scale).
+};
 
 extern Constants constants;
 

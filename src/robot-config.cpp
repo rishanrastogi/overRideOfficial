@@ -3,23 +3,29 @@
 vex::brain Brain;
 vex::controller Controller;
 
-// mikLib v2.0 setup, if you are following along with video tutorials it is going to be slightly different
 
 Chassis chassis(
     // Left drivetrain motors (left/right is looking from behind the robot)
     mik::motor_group({
-        mik::motor(PORT1, false, blue_6_1, "left front motor"), // For holonomic drivetrains, you must include "front" and "back" for the motor names
-        mik::motor(PORT2, false, blue_6_1, "left middle motor"),
-        mik::motor(PORT3, false, blue_6_1, "left back motor"),
+        mik::motor(PORT10, false, blue_6_1, "left front motor"), 
+        mik::motor(PORT3, true, blue_6_1, "left back motor"),
     }),
-    // Right drivetrain motors
+    // // Right drivetrain motors
     mik::motor_group({
-        mik::motor(PORT4, true, blue_6_1, "right front motor"),
-        mik::motor(PORT5, true, blue_6_1, "right middle motor"),
-        mik::motor(PORT6, true, blue_6_1, "right back motor"),
+        mik::motor(PORT6, false, blue_6_1, "right front motor"),
+        mik::motor(PORT5, true, blue_6_1, "right back motor"),
     }),
+    // mik::motor_group({
+    //     mik::motor(PORT1, true, blue_6_1, "left front motor"), 
+    //     mik::motor(PORT2, true, blue_6_1, "left back motor"),
+    // }),
+    // // Right drivetrain motors
+    // mik::motor_group({
+    //     mik::motor(PORT9, false, blue_6_1, "right front motor"),
+    //     mik::motor(PORT10, false, blue_6_1, "right back motor"),
+    // }),
 	
-    PORT7,  // Inertial sensor port
+    PORT0,  // Inertial sensor port
     360,    // Inertial scale (rotation reading after a full 360° turn)
 	false,  // Forces inertial sensor to recalibrate until it is within minimum threshold of 0.05 deg for 1 second
 	
@@ -37,39 +43,41 @@ Chassis chassis(
     // Distance sensors mounted on a face of the robot
     mik::distance_reset({
         mik::distance(
-			PORT8,		   // Distance sensor port
+			PORT0,		   // Distance sensor port
             rear_sensor,   // "front_sensor", "rear_sensor", "left_sensor", "right_sensor"
             4,             // X offset from tracking center (in). Positive = right of center, negative = left. 
             6              // Y offset from tracking center (in). Positive = in front of center, negative = behind.
         ),
-        mik::distance(PORT3, left_sensor, -6, 4),
+        mik::distance(PORT0, left_sensor, -6, 4),
     })
 );
 
 // Add your devices in assembly.h then create them here
 
 /* Creating a motor group in assembly */
-mik::motor_group Assembly::lower_intake_motors({
-	mik::motor(PORT8, true, green_18_1, "bottom_intake"),
-	mik::motor(PORT9, false, green_18_1, "middle_intake")
-});
+// mik::motor_group Assembly::lower_intake_motors({
+// 	mik::motor(PORT8, true, green_18_1, "bottom_intake"),
+// 	mik::motor(PORT9, false, green_18_1, "middle_intake")
+// });
 
-/* Creating upper intake motor in assembly */
-mik::motor Assembly::upper_intake_motor(PORT10, false, blue_6_1, "upper_intake");
 
-/* Creating pistons in assembly */
-mik::piston Assembly::scraper_piston(PORT_A);
-mik::piston Assembly::wing_piston(PORT_B);
+//Cascade Motors
+mik::motor Assembly::cascade_motorL1(PORT11, false, blue_6_1, "cascade_motorL1");
+mik::motor Assembly::cascade_motorL2(PORT12, true, blue_6_1, "cascade_motorL2");
+mik::motor Assembly::cascade_motorR1(PORT19, false, blue_6_1, "cascade_motorR1");
+mik::motor Assembly::cascade_motorR2(PORT20, true, blue_6_1, "cascade_motorR2");
+
+// Groups share the motors above (pointer overload) instead of copying them.
+// The explicit vector type is required: a bare {&a, &b} is ambiguous with the
+// const std::vector<mik::motor>& overload.
+mik::motor_group Assembly::cascade_right(std::vector<mik::motor*>{&cascade_motorR1, &cascade_motorR2});
+mik::motor_group Assembly::cascade_left(std::vector<mik::motor*>{&cascade_motorL1, &cascade_motorL2});	
 
 /* Creating alternative vex devices in assembly */
-vex::rotation Assembly::rotation_sensor(PORT11);
-vex::optical Assembly::optical_sensor(PORT12);
-vex::limit Assembly::limit_switch(to_triport(PORT_C));
+mik::piston Assembly::claw(PORT_A, false); 
 
 
 
-
-// mikLib initialization below, you do not need to edit
 
 Assembly assembly;
 Constants constants;

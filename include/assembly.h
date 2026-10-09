@@ -4,30 +4,38 @@
 
 using namespace vex;
 
-// The internals of this class is example code and can be deleted
-
-// This is example code for a push back robot with two 5.5W motors on the lower intake,
-// 11W motor on the top intake, a scraper, and wing
-
 class Assembly {
 public:
-/* Create your devices here */
-    static mik::motor_group lower_intake_motors;
-    static mik::motor upper_intake_motor;
-    static mik::piston scraper_piston;
-    static mik::piston wing_piston;
 
-/* Examples of other vex devices you may need */
-    static vex::rotation rotation_sensor;
+
+    // Cascade Motors
+    static mik::motor cascade_motorL1;
+    static mik::motor cascade_motorL2;
+    static mik::motor cascade_motorR1;
+    static mik::motor cascade_motorR2;
+    static mik::motor_group cascade_left;
+    static mik::motor_group cascade_right;
+
+    // Cascade Rotation Sensors
+    static vex::rotation rotation_sensorR;
+    static vex::rotation rotation_sensorL;
+    static vex::rotation rotation_sensorM;
+
+
     static vex::optical optical_sensor;
     static vex::limit limit_switch;
+
+    static mik::piston claw;
     
     void init();
     void control();
 
-    void lower_intake_control();
-    void upper_intake_control();
-    void wing_piston_control();
-    void scraper_piston_control();
+    // void lower_intake_control();
+    // void upper_intake_control();
+    // void wing_piston_control();
+    // void scraper_piston_control();
+    // void cascadePre();
+    void cascadeControl();
+    void clawControl();
     
 };

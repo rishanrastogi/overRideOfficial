@@ -369,6 +369,9 @@ public:
     /** @brief Drive a holonomic chassis with robot-centric split-arcade control: Axis3 throttle, Axis1 turn, Axis4 strafe. */
     void split_arcade_holonomic();
 
+    /** @brief Drive using cheesy/curvature drive: sinusoidal turn remapping, negative inertia, and quick-stop accumulator. */
+    void cheesy_drive();
+
     /**
      * @brief Dispatch joystick input based on the selected drive mode.
      * @param dm Drive mode enumeration.
@@ -390,6 +393,15 @@ public:
      * @param control_desaturate_bias Desaturation bias when throttle+turn exceeds 100 (0 = prioritize turn, 1 = prioritize throttle, default 0.5).
      */
     void set_control_constants(float control_throttle_deadband, float control_throttle_min_output, float control_throttle_curve_gain, float control_turn_deadband, float control_turn_min_output, float control_turn_curve_gain, float control_desaturate_bias);
+
+    /**
+     * @brief Set cheesy drive tuning constants.
+     * @param turn_nonlinearity Sinusoidal remapping depth (0-1, higher = more nonlinear).
+     * @param neg_inertia_scalar Scales how aggressively negative inertia corrects overshoot.
+     * @param sensitivity Scales overall turn output when driving forward.
+     * @param slew Max throttle change per 5ms iteration (0-1 scale).
+     */
+    void set_cheesy_drive_constants(float turn_nonlinearity, float neg_inertia_scalar, float sensitivity, float slew);
 
     /**
      * @brief Resets default turn constants.
@@ -525,6 +537,12 @@ public:
 
     /** @brief Currently selected joystick drive mode. */
     mik::drive_mode selected_drive_mode = mik::drive_mode::SPLIT_ARCADE;
+
+    // Cheesy drive accumulator state
+    double cd_quick_stop_accumulator = 0.0;
+    double cd_neg_inertia_accumulator = 0.0;
+    double cd_prev_turn = 0.0;
+    double cd_prev_throttle = 0.0;
 
 
 // SET POINTS. USED FOR GRAPHING AND ACCESSING CHASSIS DATA IN ANOTHER TASK

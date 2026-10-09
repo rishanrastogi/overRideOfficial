@@ -18,6 +18,7 @@ namespace mik {
         SPLIT_ARCADE_CURVED,     // Split arcade with curved turns (from lemlib)
         TANK,                    // Tank drive
         TANK_CURVED,             // Tank drive with curved turn (from lemlib)
+        CHEESY_DRIVE,            // Cheesy/curvature drive (254-style sinusoidal remapping)
         FIELD_CENTRIC_HOLONOMIC, // Field centric driving for holonomic drivetrains
         SPLIT_ARCADE_HOLONOMIC   // Split Arcade that allows strafing
     };

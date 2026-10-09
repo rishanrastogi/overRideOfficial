@@ -339,6 +339,64 @@ void Chassis::tank_curved() {
     right_drive.spin(fwd, percent_to_volt(right_throttle), volt);
 }
 
+static double cd_turn_remapping(double iturn, double nonlinearity) {
+    double denominator = sin(M_PI / 2.0 * nonlinearity);
+    double first = sin(M_PI / 2.0 * nonlinearity * iturn) / denominator;
+    return sin(M_PI / 2.0 * nonlinearity * first) / denominator;
+}
+
+void Chassis::cheesy_drive() {
+    double raw_throttle = vex::controller(vex::primary).Axis3.value() / 100.0;
+    double raw_turn     = vex::controller(vex::primary).Axis1.value() / 100.0;
+
+    double throttle_db = constants.control_throttle_deadband / 100.0;
+    double turn_db     = constants.control_turn_deadband / 100.0;
+
+    bool turn_in_place = false;
+    double linear_cmd = raw_throttle;
+
+    if (fabs(raw_throttle) < throttle_db && fabs(raw_turn) > turn_db) {
+        linear_cmd = 0.0;
+        turn_in_place = true;
+    } else if (raw_throttle - cd_prev_throttle > constants.cd_slew) {
+        linear_cmd = cd_prev_throttle + constants.cd_slew;
+    } else if (raw_throttle - cd_prev_throttle < -(constants.cd_slew * 2)) {
+        linear_cmd = cd_prev_throttle - (constants.cd_slew * 2);
+    }
+
+    double remapped_turn = cd_turn_remapping(raw_turn, constants.cd_turn_nonlinearity);
+
+    double left_pct, right_pct;
+    if (turn_in_place) {
+        left_pct  =  remapped_turn * fabs(remapped_turn) * 100.0;
+        right_pct = -remapped_turn * fabs(remapped_turn) * 100.0;
+    } else {
+        double neg_inertia_power = (raw_turn - cd_prev_turn) * constants.cd_neg_inertia_scalar;
+        cd_neg_inertia_accumulator += neg_inertia_power;
+
+        double angular_cmd = fabs(linear_cmd)
+            * (remapped_turn + cd_neg_inertia_accumulator) * constants.cd_sensitivity
+            - cd_quick_stop_accumulator;
+
+        left_pct  = (linear_cmd + angular_cmd) * 100.0;
+        right_pct = (linear_cmd - angular_cmd) * 100.0;
+
+        if (cd_neg_inertia_accumulator > 1)       cd_neg_inertia_accumulator -= 1;
+        else if (cd_neg_inertia_accumulator < -1) cd_neg_inertia_accumulator += 1;
+        else                                       cd_neg_inertia_accumulator  = 0;
+
+        if (cd_quick_stop_accumulator > 1)        cd_quick_stop_accumulator -= 1;
+        else if (cd_quick_stop_accumulator < -1)  cd_quick_stop_accumulator += 1;
+        else                                       cd_quick_stop_accumulator  = 0.0;
+    }
+
+    cd_prev_turn     = raw_turn;
+    cd_prev_throttle = linear_cmd;
+
+    left_drive.spin(vex::fwd,  percent_to_volt((float)left_pct),  volt);
+    right_drive.spin(vex::fwd, percent_to_volt((float)right_pct), volt);
+}
+
 void Chassis::split_arcade_holonomic() {
     float throttle = deadband(controller(primary).Axis3.value(), 5);
     float turn = deadband(controller(primary).Axis1.value(), 5);
@@ -380,6 +438,7 @@ void Chassis::control(drive_mode dm) {
         case drive_mode::SPLIT_ARCADE_CURVED: return split_arcade_curved();
         case drive_mode::TANK: return tank();
         case drive_mode::TANK_CURVED: return tank_curved();
+        case drive_mode::CHEESY_DRIVE: return cheesy_drive();
         case drive_mode::FIELD_CENTRIC_HOLONOMIC: return field_centric_holonomic();
         case drive_mode::SPLIT_ARCADE_HOLONOMIC: return split_arcade_holonomic();
     }
@@ -393,6 +452,13 @@ void Chassis::set_control_constants(float control_throttle_deadband, float contr
     constants.control_turn_min_output = control_turn_min_output;
     constants.control_turn_curve_gain = control_turn_curve_gain;
     constants.control_desaturate_bias = control_desaturate_bias;
+}
+
+void Chassis::set_cheesy_drive_constants(float turn_nonlinearity, float neg_inertia_scalar, float sensitivity, float slew) {
+    constants.cd_turn_nonlinearity = turn_nonlinearity;
+    constants.cd_neg_inertia_scalar = neg_inertia_scalar;
+    constants.cd_sensitivity = sensitivity;
+    constants.cd_slew = slew;
 }
 
 void Chassis::set_turn_constants(float turn_max_voltage, float turn_kp, float turn_ki, float turn_kd, float turn_starti, float turn_slew) {

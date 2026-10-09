@@ -4,6 +4,9 @@ void default_constants() {
     // Each controller constant in the form of throttle, turn (deadband, min_output, curve_gain), desaturate_bias.
     chassis.set_control_constants(5, 10, 1.019, 5, 10, 1.019, 0.5);
 
+    // Cheesy drive constants in the form of (turn_nonlinearity, neg_inertia_scalar, sensitivity, slew).
+    chassis.set_cheesy_drive_constants(0.5, 3.0, 0.5, 0.1);
+
     // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI, slew).
     chassis.set_drive_constants(8, 1.5, 0, 10, 0, 2);
     chassis.set_heading_constants(10, .4, 0, 1, 0, 0);
