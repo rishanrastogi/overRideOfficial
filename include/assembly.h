@@ -9,12 +9,23 @@ public:
 
 
     // Cascade Motors
-    static mik::motor cascade_motorL1;
-    static mik::motor cascade_motorL2;
-    static mik::motor cascade_motorR1;
-    static mik::motor cascade_motorR2;
-    static mik::motor_group cascade_left;
-    static mik::motor_group cascade_right;
+    // static mik::motor cascade_motorL1;
+    // static mik::motor cascade_motorL2;
+    // static mik::motor cascade_motorR1;
+    // static mik::motor cascade_motorR2;
+    // static mik::motor_group cascade_left;
+    // static mik::motor_group cascade_right;
+
+    // 6B Motors
+    static mik::motor sixbar_motorL1;
+    static mik::motor sixbar_motorR1;
+    static mik::motor sixbar_motorL2;
+    static mik::motor sixbar_motorR2;
+
+    static mik::motor_group sixbar_left;
+    static mik::motor_group sixbar_right;
+
+    static mik::motor toggle;
 
     // Cascade Rotation Sensors
     static vex::rotation rotation_sensorR;
@@ -35,7 +46,9 @@ public:
     // void wing_piston_control();
     // void scraper_piston_control();
     // void cascadePre();
-    void cascadeControl();
+    // void cascadeControl();
     void clawControl();
+    void sixBarControl();
+    void toggleControl();
     
 };

@@ -8,9 +8,9 @@ void default_constants() {
     chassis.set_cheesy_drive_constants(0.5, 3.0, 0.5, 0.1);
 
     // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI, slew).
-    chassis.set_drive_constants(8, 1.5, 0, 10, 0, 2);
+    chassis.set_drive_constants(12, 1.5, 0, 10, 0, 2);
     chassis.set_heading_constants(10, .4, 0, 1, 0, 0);
-    chassis.set_turn_constants(12, .4, .03, 3, 15, 0);
+    chassis.set_turn_constants(12, 0.5,0,2.650, 15, 0);
     chassis.set_swing_constants(12, .4, .01, 2, 15, 0);
 
     // Each exit condition set is in the form of (settle_error, settle_time, timeout).
@@ -32,7 +32,13 @@ std::string blue_left_winpoint(bool calibrate, auto_variation var, bool get_name
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
+
+        //toggle
+        chassis.drive_distance(8);
+        chassis.drive_distance(-10);
+        chassis.drive_distance(10);
+        chassis.drive_distance(-20);
 
         return "";
     }    
@@ -48,7 +54,7 @@ std::string blue_left_sawp(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -64,7 +70,7 @@ std::string blue_left_elim(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -80,7 +86,7 @@ std::string blue_right_winpoint(bool calibrate, auto_variation var, bool get_nam
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -96,7 +102,7 @@ std::string blue_right_sawp(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -112,7 +118,7 @@ std::string blue_right_elim(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -129,7 +135,7 @@ std::string red_left_winpoint(bool calibrate, auto_variation var, bool get_name)
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -145,7 +151,7 @@ std::string red_left_sawp(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -161,7 +167,7 @@ std::string red_left_elim(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -177,7 +183,7 @@ std::string red_right_winpoint(bool calibrate, auto_variation var, bool get_name
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -193,7 +199,7 @@ std::string red_right_sawp(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
@@ -209,7 +215,7 @@ std::string red_right_elim(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-        chassis.set_coordinates(0, 0, 0);
+        // chassis.set_coordinates(0, 0, 0);
 
         return "";
     }

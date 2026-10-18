@@ -11,8 +11,8 @@ void Assembly::init() {
 
     // For example a task that is always checking if the intake is moving forward while being told to,
     // and detected not, then the intake will move in reverse to unjam itself
-    cascade_left.setStopping(vex::brakeType::hold);
-    cascade_right.setStopping(vex::brakeType::hold);
+    sixbar_left.setStopping(vex::brakeType::hold);
+    sixbar_right.setStopping(vex::brakeType::hold);
 } 
 
 // You want to put this function inside the user control loop in main.
@@ -28,8 +28,10 @@ void Assembly::control() {
     // upper_intake_control();
     // wing_piston_control();
     // scraper_piston_control();
-    cascadeControl();
+    // cascadeControl();
     clawControl();
+    sixBarControl();
+    toggleControl();
 }
 
 
@@ -72,28 +74,28 @@ void Assembly::control() {
 //     }
 // }
 
-void Assembly::cascadeControl(){
-    if (Controller.ButtonR1.pressing()) {
-        cascade_left.spin(fwd, 8, volt);
-        cascade_right.spin(reverse, 8, volt);
-    } 
-    else if (Controller.ButtonR2.pressing()) {
-        cascade_left.spin(reverse, 8, volt);
-        cascade_right.spin(fwd, 8 , volt);
-    } 
-    else if (Controller.ButtonL1.pressing()) {
-        cascade_left.spin(reverse, 8, volt);
-        cascade_right.spin(reverse, 8, volt);
-    } 
-    else if (Controller.ButtonL2.pressing()) {
-        cascade_left.spin(fwd, 8, volt);
-        cascade_right.spin(fwd, 8, volt);
-    } 
-    else { 
-        cascade_left.stop();
-        cascade_right.stop();
-    }
-}
+// void Assembly::cascadeControl(){
+//     if (Controller.ButtonR1.pressing()) {
+//         cascade_left.spin(fwd, 8, volt);
+//         cascade_right.spin(reverse, 8, volt);
+//     } 
+//     else if (Controller.ButtonR2.pressing()) {
+//         cascade_left.spin(reverse, 8, volt);
+//         cascade_right.spin(fwd, 8 , volt);
+//     } 
+//     else if (Controller.ButtonL1.pressing()) {
+//         cascade_left.spin(reverse, 8, volt);
+//         cascade_right.spin(reverse, 8, volt);
+//     } 
+//     else if (Controller.ButtonL2.pressing()) {
+//         cascade_left.spin(fwd, 8, volt);
+//         cascade_right.spin(fwd, 8, volt);
+//     } 
+//     else { 
+//         cascade_left.stop();
+//         cascade_right.stop();
+//     }
+// }
 
 // Up opens the claw, Down closes it, B flips whichever state it is in.
 // Each acts on the press itself, and the solenoid latches, so the claw stays
@@ -118,4 +120,31 @@ void Assembly::clawControl() {
     prev_up = up;
     prev_down = down;
     prev_toggle = toggle;
+}
+
+void Assembly::sixBarControl(){
+    if (Controller.ButtonR1.pressing()) {
+        sixbar_left.spin(fwd, 12, volt);
+        sixbar_right.spin(reverse, 12, volt);
+    } 
+    else if (Controller.ButtonR2.pressing()) {
+        sixbar_left.spin(reverse, 0.75, volt);
+        sixbar_right.spin(fwd, 0.75, volt);
+    } 
+    else{
+        sixbar_left.stop();
+        sixbar_right.stop();
+    }
+}
+
+void Assembly::toggleControl(){
+    if (Controller.ButtonL1.pressing()) {
+        toggle.spin(fwd, 12, volt);
+    } 
+    else if (Controller.ButtonL2.pressing()) {
+        toggle.spin(reverse, 12, volt);
+    } 
+    else{
+        toggle.stop();
+    }
 }

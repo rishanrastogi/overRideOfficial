@@ -7,13 +7,13 @@ vex::controller Controller;
 Chassis chassis(
     // Left drivetrain motors (left/right is looking from behind the robot)
     mik::motor_group({
-        mik::motor(PORT10, false, blue_6_1, "left front motor"), 
-        mik::motor(PORT3, true, blue_6_1, "left back motor"),
+        mik::motor(PORT12, false, blue_6_1, "left front motor"),
+        mik::motor(PORT13, false, blue_6_1, "left back motor"),
     }),
     // // Right drivetrain motors
     mik::motor_group({
-        mik::motor(PORT6, false, blue_6_1, "right front motor"),
-        mik::motor(PORT5, true, blue_6_1, "right back motor"),
+        mik::motor(PORT19, true, blue_6_1, "right front motor"),
+        mik::motor(PORT18, true, blue_6_1, "right back motor"),
     }),
     // mik::motor_group({
     //     mik::motor(PORT1, true, blue_6_1, "left front motor"), 
@@ -25,7 +25,7 @@ Chassis chassis(
     //     mik::motor(PORT10, false, blue_6_1, "right back motor"),
     // }),
 	
-    PORT0,  // Inertial sensor port
+    PORT10,  // Inertial sensor port
     360,    // Inertial scale (rotation reading after a full 360° turn)
 	false,  // Forces inertial sensor to recalibrate until it is within minimum threshold of 0.05 deg for 1 second
 	
@@ -62,21 +62,28 @@ Chassis chassis(
 
 
 //Cascade Motors
-mik::motor Assembly::cascade_motorL1(PORT11, false, blue_6_1, "cascade_motorL1");
-mik::motor Assembly::cascade_motorL2(PORT12, true, blue_6_1, "cascade_motorL2");
-mik::motor Assembly::cascade_motorR1(PORT19, false, blue_6_1, "cascade_motorR1");
-mik::motor Assembly::cascade_motorR2(PORT20, true, blue_6_1, "cascade_motorR2");
+// mik::motor Assembly::cascade_motorL1(PORT11, false, blue_6_1, "cascade_motorL1");
+// mik::motor Assembly::cascade_motorL2(PORT12, true, blue_6_1, "cascade_motorL2");
+// mik::motor Assembly::cascade_motorR1(PORT19, false, blue_6_1, "cascade_motorR1");
+// mik::motor Assembly::cascade_motorR2(PORT20, true, blue_6_1, "cascade_motorR2");
 
 // Groups share the motors above (pointer overload) instead of copying them.
 // The explicit vector type is required: a bare {&a, &b} is ambiguous with the
 // const std::vector<mik::motor>& overload.
-mik::motor_group Assembly::cascade_right(std::vector<mik::motor*>{&cascade_motorR1, &cascade_motorR2});
-mik::motor_group Assembly::cascade_left(std::vector<mik::motor*>{&cascade_motorL1, &cascade_motorL2});	
+// mik::motor_group Assembly::cascade_right(std::vector<mik::motor*>{&cascade_motorR1, &cascade_motorR2});
+// mik::motor_group Assembly::cascade_left(std::vector<mik::motor*>{&cascade_motorL1, &cascade_motorL2});	
 
 /* Creating alternative vex devices in assembly */
-mik::piston Assembly::claw(PORT_A, false); 
+mik::piston Assembly::claw(PORT_H, false); 
+mik::motor Assembly::sixbar_motorL1(PORT17, true, red_36_1, "sixbar_motorL");
+mik::motor Assembly::sixbar_motorR1(PORT14, true, red_36_1, "sixbar_motorR");
+mik::motor Assembly::sixbar_motorL2(PORT16, false, green_18_1, "sixbar_motorL");
+mik::motor Assembly::sixbar_motorR2(PORT15, false, green_18_1	, "sixbar_motorR");
 
+mik::motor_group Assembly::sixbar_right(std::vector<mik::motor*>{&sixbar_motorR1, &sixbar_motorR2});
+mik::motor_group Assembly::sixbar_left(std::vector<mik::motor*>{&sixbar_motorL1, &sixbar_motorL2});	
 
+mik::motor Assembly::toggle(PORT11, false, green_18_1, "toggle_motor");
 
 
 Assembly assembly;

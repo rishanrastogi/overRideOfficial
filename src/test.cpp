@@ -2,7 +2,7 @@
 
 void test_constants() {
 	default_constants();
-	chassis.set_drive_constants(10, 0, 0, 0, 3, 0);
+	chassis.set_drive_constants(12, 1.5, 0, 10, 3, 0);
     chassis.set_heading_constants(0, 0, 0, 0, 0, 0);
     chassis.set_turn_constants(12,0, 0, 0, 0, 0);
     chassis.set_swing_constants(12, 0, 0, 0, 0, 0);
@@ -23,11 +23,11 @@ void test_heading() {
 
 void test_turn() {
 	chassis.turn_to_angle(5);
-	// chassis.turn_to_angle(30);
-	// chassis.turn_to_angle(90);
-	// chassis.turn_to_angle(225);
-	// chassis.turn_to_angle(180, {.direction = ccw});
-	// chassis.turn_to_angle(359, {.direction = cw});
+	chassis.turn_to_angle(30);
+	chassis.turn_to_angle(90);
+	chassis.turn_to_angle(225);
+	chassis.turn_to_angle(180, {.direction = ccw});
+	chassis.turn_to_angle(359, {.direction = cw});
 }
 
 void test_swing() {
