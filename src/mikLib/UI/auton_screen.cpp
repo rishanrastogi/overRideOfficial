@@ -18,7 +18,7 @@ void UI_auton_screen::queue_autons(bool calibrating, bool set_description) {
     if (off_skills) { output = skills(calibrating, var, set_description); return; }
 
     if (!red_blue && !rings_goal && !quals_elims && !off_sawp) { output = blue_left_winpoint(calibrating, var, set_description); return; }
-    if (!red_blue && !rings_goal && !quals_elims &&  off_sawp) { output = blue_left_sawp(calibrating, var, set_description); return; }
+    if (!red_blue && !rings_goal && !quals_elims &&  off_sawp) { output = left_two_goalpin(calibrating, var, set_description); return; }
     if (!red_blue && !rings_goal &&  quals_elims && !off_sawp) { output = blue_left_elim(calibrating, var, set_description); return; }
 
     if (!red_blue &&  rings_goal && !quals_elims && !off_sawp) { output = blue_right_winpoint(calibrating, var, set_description); return; }

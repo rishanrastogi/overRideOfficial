@@ -8,10 +8,10 @@ void default_constants() {
     chassis.set_cheesy_drive_constants(0.5, 3.0, 0.5, 0.1);
 
     // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI, slew).
-    chassis.set_drive_constants(12, 1.5, 0, 10, 0, 2);
-    chassis.set_heading_constants(10, .4, 0, 1, 0, 0);
-    chassis.set_turn_constants(12, 0.5,0,2.650, 15, 0);
-    chassis.set_swing_constants(12, .4, .01, 2, 15, 0);
+    chassis.set_drive_constants(12, 2.120, 0.040, 13.750, 3.000, 2);
+    chassis.set_heading_constants(10, 0.500, 0.010, 4.800, 0, 0);
+    chassis.set_turn_constants(12, 0.500, 0.020, 3.130, 15, 0);
+    chassis.set_swing_constants(12, 0.400, 0.010, 2.100, 15, 0);
 
     // Each exit condition set is in the form of (settle_error, settle_time, timeout).
     chassis.set_turn_exit_conditions(1, 200, 3000);
@@ -47,19 +47,67 @@ std::string blue_left_winpoint(bool calibrate, auto_variation var, bool get_name
     
     return "";
 }
-std::string blue_left_sawp(bool calibrate, auto_variation var, bool get_name) {
-    if (get_name) return "blue left sawp";
-
-    // Mirror autons here
+std::string left_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+    if (get_name) return "su: left on roller touching";
 
     if (calibrate) {
-        // Run startup sequence that you want in pre-auton, do before field controller plug in
-        // chassis.set_coordinates(0, 0, 0);
+        chassis.set_coordinates(-66.013, -8.701, 0);
 
         return "";
     }
 
-    // Place start of autonoumous here
+    assembly.toggle.setVelocity(100,percent);
+    assembly.toggle.spinFor(3.3,rev);
+    chassis.drive_distance(7);
+
+    assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+
+    chassis.left_swing_to_angle(90); //swing into cup
+    chassis.drive_distance(5.20, {.max_voltage = 10});
+
+    assembly.sixbar_left.spinFor(reverse, 0.25, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.25, rev, 3.5, volt);
+    wait(0.3,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds);
+
+    chassis.drive_distance(-7,{.heading=180});
+    chassis.turn_to_angle(135);
+    chassis.drive_distance(18.1);
+    chassis.left_swing_to_angle(180,{.timeout = 250}); //get to side pin
+    assembly.claw.close();
+    wait(0.1,seconds);
+    
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    chassis.turn_to_angle(100,{.timeout = 500});
+    chassis.drive_distance(-16,{.heading=180});
+    chassis.turn_to_angle(90);
+    chassis.drive_distance(10, {.timeout = 500}); //align with goal
+    
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
+    wait(0.3,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds); //drop stack on
+
+    chassis.drive_distance(-6, {.heading=90});
+    chassis.turn_to_angle(241);
+    chassis.drive_distance(28,{.heading = 241});
+    chassis.right_swing_to_angle(180,{.timeout = 450});
+
+    assembly.claw.close();
+    wait(0.1,seconds);
+    chassis.drive_distance(3,{.heading = 180});
+    assembly.sixbar_left.spinFor(fwd, 0.4, rev, 7, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.4, rev, 7, volt, false);
+    chassis.turn_to_angle(0);
+
+    chassis.drive_distance(15,{.timeout=200});
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
+    assembly.claw.open();
 
     return "";
 }

@@ -26,19 +26,19 @@ Chassis chassis(
     // }),
 	
     PORT10,  // Inertial sensor port
-    360,    // Inertial scale (rotation reading after a full 360° turn)
+    361,    // Inertial scale (rotation reading after a full 360° turn)
 	false,  // Forces inertial sensor to recalibrate until it is within minimum threshold of 0.05 deg for 1 second
 	
     2.75,   // Drivetrain wheel diameter (in). Negative flips direction.
     450,    // Drivetrain RPM. Cartridge * gear ratio, (Ex: 600 * (36/48) = 450).
 
-    PORT0,  // Forward tracker port. PORT0 if unused. Accepts "PORT_A"
-    2,      // Forward tracker wheel diameter (in). Negative flips direction. Pushing robot forward at 0° should increase Y
-    0,      // Forward tracker center distance (in). Positive = right of center, negative = left.
+    PORT1,  // Forward tracker port. PORT0 if unused. Accepts "PORT_A"
+    -2,      // Forward tracker wheel diameter (in). Negative flips direction. Pushing robot forward at 0° should increase Y
+    -0.5,      // Forward tracker center distance (in). Positive = right of center, negative = left.
 
-    PORT0,  // Sideways tracker port. PORT0 if unused. Accepts "PORT_A"
+    PORT20,  // Sideways tracker port. PORT0 if unused. Accepts "PORT_A"
     -2,     // Sideways tracker wheel diameter (in). Negative flips direction. Pushing robot right at 0° should increase X
-    0,      // Sideways tracker center distance (in). Positive = behind center, negative = in front.
+    4,      // Sideways tracker center distance (in). Positive = behind center, negative = in front.
 
     // Distance sensors mounted on a face of the robot
     mik::distance_reset({
@@ -83,7 +83,7 @@ mik::motor Assembly::sixbar_motorR2(PORT15, false, green_18_1	, "sixbar_motorR")
 mik::motor_group Assembly::sixbar_right(std::vector<mik::motor*>{&sixbar_motorR1, &sixbar_motorR2});
 mik::motor_group Assembly::sixbar_left(std::vector<mik::motor*>{&sixbar_motorL1, &sixbar_motorL2});	
 
-mik::motor Assembly::toggle(PORT11, false, green_18_1, "toggle_motor");
+mik::motor Assembly::toggle(PORT8, false, green_18_1, "toggle_motor");
 
 
 Assembly assembly;
