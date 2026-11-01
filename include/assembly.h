@@ -37,6 +37,17 @@ public:
     static vex::limit limit_switch;
 
     static mik::piston claw;
+
+    // AI Vision: looks for the toggle's color. Colors are tuned in the AI Vision Utility.
+    static vex::aivision::colordesc red_toggle;
+    static vex::aivision::colordesc blue_toggle;
+    static vex::aivision::colordesc yellow_toggle;
+    static vex::aivision ai_vision;
+
+    /** @brief For autons: flips the toggle until the camera sees red. */
+    void flip_toggle_to_red();
+    /** @brief For autons: flips the toggle until the camera sees blue. */
+    void flip_toggle_to_blue();
     
     void init();
     void control();

@@ -128,8 +128,8 @@ void Assembly::sixBarControl(){
         sixbar_right.spin(reverse, 12, volt);
     } 
     else if (Controller.ButtonR2.pressing()) {
-        sixbar_left.spin(reverse, 0.75, volt);
-        sixbar_right.spin(fwd, 0.75, volt);
+        sixbar_left.spin(reverse, 3, volt);
+        sixbar_right.spin(fwd, 3, volt);
     } 
     else{
         sixbar_left.stop();
@@ -148,3 +148,36 @@ void Assembly::toggleControl(){
         toggle.stop();
     }
 }
+
+// Smallest bounding box (pixels^2) that counts as the toggle, so stray specks of color are ignored.
+static const int toggle_min_area = 35000;
+
+// For autons. Spins the toggle until the camera sees red, then stops and holds.
+// Yellow, blue, or nothing in view (mid-flip) all keep it spinning.
+void Assembly::flip_toggle_to_red() {
+    while (!(ai_vision.takeSnapshot(red_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
+        toggle.spin(fwd, 12, volt);
+        vex::task::sleep(20);
+    }
+    toggle.stop();
+}
+
+// For autons. Spins the toggle until the camera sees blue, then stops and holds.
+// Yellow, red, or nothing in view (mid-flip) all keep it spinning.
+// void Assembly::flip_toggle_to_blue() {
+//     while (!(ai_vision.takeSnapshot(blue_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
+//         toggle.spin(fwd, 12, volt);
+//         claw.open();
+//         vex::task::sleep(20);
+//     }
+//     toggle.stop();
+// }
+
+void Assembly::flip_toggle_to_blue() {
+    while (!(ai_vision.takeSnapshot(blue_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
+        toggle.spin(fwd, 12, volt);
+        vex::task::sleep(20);
+    }
+    toggle.stop();
+}
+

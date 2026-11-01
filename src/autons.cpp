@@ -47,7 +47,7 @@ std::string blue_left_winpoint(bool calibrate, auto_variation var, bool get_name
     
     return "";
 }
-std::string left_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+std::string blue_left_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
     if (get_name) return "su: left on roller touching";
 
     if (calibrate) {
@@ -55,29 +55,32 @@ std::string left_two_goalpin(bool calibrate, auto_variation var, bool get_name) 
 
         return "";
     }
-
+    // assembly.toggle.setVelocity(100,percent);
+    // assembly.toggle.spinFor(2.25,rev);
     assembly.toggle.setVelocity(100,percent);
-    assembly.toggle.spinFor(3.3,rev);
+    assembly.flip_toggle_to_blue();
+
     chassis.drive_distance(7);
 
     assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
 
     chassis.left_swing_to_angle(90); //swing into cup
-    chassis.drive_distance(5.20, {.max_voltage = 10});
+    chassis.drive_distance(5.25, {.timeout = 525});
 
-    assembly.sixbar_left.spinFor(reverse, 0.25, rev, 3.5, volt, false);
-    assembly.sixbar_right.spinFor(fwd, 0.25, rev, 3.5, volt);
-    wait(0.3,seconds);
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.1,seconds);
     assembly.claw.open();
     wait(0.1,seconds);
 
     chassis.drive_distance(-7,{.heading=180});
     chassis.turn_to_angle(135);
-    chassis.drive_distance(18.1);
-    chassis.left_swing_to_angle(180,{.timeout = 250}); //get to side pin
+    chassis.drive_distance(18.75);
+    chassis.left_swing_to_angle(180,{.timeout = 500}); //get to side pin
+    chassis.drive_distance(1,{.timeout = 100});
     assembly.claw.close();
-    wait(0.1,seconds);
+    wait(0.15,seconds);
     
     assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
@@ -88,29 +91,386 @@ std::string left_two_goalpin(bool calibrate, auto_variation var, bool get_name) 
     
     assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
     assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
-    wait(0.3,seconds);
+    wait(0.15,seconds);
     assembly.claw.open();
     wait(0.1,seconds); //drop stack on
 
     chassis.drive_distance(-6, {.heading=90});
     chassis.turn_to_angle(241);
-    chassis.drive_distance(28,{.heading = 241});
-    chassis.right_swing_to_angle(180,{.timeout = 450});
-
+    chassis.drive_distance(29.5,{.heading = 241});
+    chassis.right_swing_to_angle(180,{.timeout = 450, .min_voltage = 12});
+    chassis.drive_distance(1.5,{.timeout = 100});
     assembly.claw.close();
-    wait(0.1,seconds);
-    chassis.drive_distance(3,{.heading = 180});
+    wait(0.15,seconds);
     assembly.sixbar_left.spinFor(fwd, 0.4, rev, 7, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.4, rev, 7, volt, false);
-    chassis.turn_to_angle(0);
+    chassis.drive_distance(1,{.heading = 180});
+    chassis.turn_to_angle(0); 
 
-    chassis.drive_distance(15,{.timeout=200});
+    chassis.drive_distance(15,{.timeout=300});
     assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
     assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
-    assembly.claw.open();
+    wait(0.15,seconds);
+    assembly.claw.open(); // final
 
     return "";
 }
+
+std::string blue_right_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+    if (get_name) return "su: left on roller touching";
+
+    if (calibrate) {
+        chassis.set_coordinates(-66.013, -8.701, 0);
+
+        return "";
+    }
+    assembly.toggle.setVelocity(100,percent);
+    assembly.flip_toggle_to_blue();
+
+    chassis.drive_distance(6.5);
+
+    assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+
+    chassis.right_swing_to_angle(270); //swing into cup
+    chassis.drive_distance(7, {.timeout = 700});
+
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.1,seconds);
+    assembly.claw.open();
+    wait(0.75,seconds);
+
+    chassis.drive_distance(-2);
+    wait(0.1,seconds);
+    chassis.drive_distance(1.75);
+    chassis.drive_distance(-8.5,{.heading=180});
+    chassis.turn_to_angle(225);
+    chassis.drive_distance(18.75);
+    chassis.right_swing_to_angle(180,{.timeout = 500}); //get to side pin
+    chassis.drive_distance(1,{.timeout = 100});
+    assembly.claw.close();
+    wait(0.15,seconds);
+    
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    chassis.turn_to_angle(260,{.timeout = 500});
+    chassis.drive_distance(-16,{.heading=180});
+    chassis.turn_to_angle(270);
+    chassis.drive_distance(9.4, {.timeout = 500}); //align with goal
+    
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
+    wait(0.15,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds); //drop stack on
+    chassis.drive_distance(-10);
+
+    // chassis.drive_distance(-6, {.heading=90});
+    // chassis.turn_to_angle(241);
+    // chassis.drive_distance(29.5,{.heading = 241});
+    // chassis.right_swing_to_angle(180,{.timeout = 450, .min_voltage = 12});
+    // chassis.drive_distance(1.5,{.timeout = 100});
+    // assembly.claw.close();
+    // wait(0.15,seconds);
+    // assembly.sixbar_left.spinFor(fwd, 0.4, rev, 7, volt, false);
+    // assembly.sixbar_right.spinFor(reverse, 0.4, rev, 7, volt, false);
+    // chassis.drive_distance(1,{.heading = 180});
+    // chassis.turn_to_angle(0); 
+
+    // chassis.drive_distance(15,{.timeout=300});
+    // assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
+    // assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
+    // wait(0.15,seconds);
+    // assembly.claw.open(); // final
+
+    return "";
+}
+
+
+
+
+// std::string blue_right_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+//     if (get_name) return "su: right on roller touching";
+
+//     if (calibrate) {
+//         chassis.set_coordinates(8.118, 59.615 , 180);
+
+//         return "";
+//     }
+
+
+//     assembly.toggle.setVelocity(100,percent);
+//     assembly.flip_toggle_to_blue();
+
+
+//     wait(0.15,seconds);
+
+//     chassis.drive_distance(2, {.timeout = 600});
+
+//     assembly.sixbar_left.spinFor(fwd, 0.2, rev, 6, volt, false);
+//     assembly.sixbar_right.spinFor(reverse, 0.2, rev, 6, volt, false);
+
+
+//     chassis.turn_to_point(22.365, 49.197, {.timeout = 1200});
+//     chassis.drive_to_point(22.365, 49.197, {.max_voltage = 10, .timeout = 2200});
+
+
+//     assembly.sixbar_left.spinFor(reverse, 0.2, rev, 3.5, volt, false);
+//     assembly.sixbar_right.spinFor(fwd, 0.2, rev, 3.5, volt, false);
+//     wait(0.3,seconds);
+//     assembly.claw.open();
+//     wait(0.2,seconds); // score the preload
+
+//     chassis.drive_distance(-12, {.timeout = 1500}); 
+//     // go to and clamp the first one
+//     // chassis.turn_to_point(26.2, 26.25, {.timeout = 1200});
+//     // chassis.drive_to_point(26.2, 26.25, {.max_voltage = 4, .timeout = 4500, .wait = false});
+//     // chassis.wait_until_within(0.90);
+//     // assembly.claw.close();
+//     // wait(0.3,seconds);
+
+//     // assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false); //lift arm up while moving
+//     // assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+//     // chassis.turn_to_point(25.966, 40.494, {.timeout = 1000}); //turn to goal
+//     // chassis.drive_to_point(25.966, 40.494, {.timeout = 2000});
+
+//     // assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+//     // assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt, false);
+//     // wait(0.3,seconds);
+//     // assembly.claw.open();
+//     // wait(0.1,seconds);
+//     // chassis.drive_distance(-9, {.timeout = 900});
+
+//     // chassis.turn_to_point(48.1, 43.5, {.timeout = 1000}); // go to last cone
+//     // chassis.drive_to_point(48.1, 43.5, {.max_voltage = 4, .timeout = 4500, .wait = false});
+//     // chassis.wait_until_within(0.90);
+//     // assembly.claw.close();
+//     // wait(0.1,seconds);
+//     // assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+//     // assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt, false);
+//     // chassis.turn_to_point(28.1, 48.012, {.timeout = 1500});
+//     // wait(0.1,seconds);
+
+//     // chassis.drive_distance(12, {.timeout = 750});
+//     // assembly.sixbar_left.spinFor(reverse, 0.25, rev, 6, volt, false);
+//     // assembly.sixbar_right.spinFor(fwd, 0.25, rev, 6, volt);
+
+//     return "";
+// }
+
+
+
+// std::string red_right_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+//     if (get_name) return "su: right on roller touching";
+
+//     if (calibrate) {
+//         chassis.set_coordinates(8.118, 59.615 , 180);
+
+//         return "";
+//     }
+
+
+    
+//     assembly.toggle.setVelocity(100,percent);
+//     assembly.flip_toggle_to_red();
+
+//     wait(0.15,seconds);
+
+//     chassis.drive_distance(2, {.timeout = 600});
+
+//     assembly.sixbar_left.spinFor(fwd, 0.2, rev, 6, volt, false);
+//     assembly.sixbar_right.spinFor(reverse, 0.2, rev, 6, volt, false);
+
+
+//     chassis.turn_to_point(22.365, 49.197, {.timeout = 1200});
+//     chassis.drive_to_point(22.365, 49.197, {.max_voltage = 10, .timeout = 2200});
+
+
+//     assembly.sixbar_left.spinFor(reverse, 0.2, rev, 3.5, volt, false);
+//     assembly.sixbar_right.spinFor(fwd, 0.2, rev, 3.5, volt, false);
+//     wait(0.3,seconds);
+//     assembly.claw.open();
+//     wait(0.2,seconds); // score the preload
+
+//     chassis.drive_distance(-12, {.timeout = 1500}); // go to and clamp the first one
+//     chassis.turn_to_point(26.2, 26.25, {.timeout = 1200});
+//     chassis.drive_to_point(26.2, 26.25, {.max_voltage = 4, .timeout = 4500, .wait = false});
+//     chassis.wait_until_within(0.90);
+//     assembly.claw.close();
+//     wait(0.3,seconds);
+
+//     assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false); //lift arm up while moving
+//     assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+//     chassis.turn_to_point(25.966, 40.494, {.timeout = 1000}); //turn to goal
+//     chassis.drive_to_point(25.966, 40.494, {.timeout = 2000});
+
+//     assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+//     assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt, false);
+//     wait(0.3,seconds);
+//     assembly.claw.open();
+//     wait(0.1,seconds);
+//     chassis.drive_distance(-9, {.timeout = 900});
+
+//     chassis.turn_to_point(48.1, 43.5, {.timeout = 1000}); // go to last cone
+//     chassis.drive_to_point(48.1, 43.5, {.max_voltage = 4, .timeout = 4500, .wait = false});
+//     chassis.wait_until_within(0.90);
+//     assembly.claw.close();
+//     wait(0.1,seconds);
+//     assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+//     assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt, false);
+//     chassis.turn_to_point(28.1, 48.012, {.timeout = 1500});
+//     wait(0.1,seconds);
+
+//     chassis.drive_distance(12, {.timeout = 750});
+//     assembly.sixbar_left.spinFor(reverse, 0.25, rev, 6, volt, false);
+//     assembly.sixbar_right.spinFor(fwd, 0.25, rev, 6, volt);
+
+//     return "";
+// }
+
+std::string red_right_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+    if (get_name) return "su: left on roller touching";
+
+    if (calibrate) {
+        chassis.set_coordinates(-66.013, -8.701, 0);
+
+        return "";
+    }
+    // assembly.toggle.setVelocity(100,percent);
+    // assembly.toggle.spinFor(2.25,rev);
+    assembly.toggle.setVelocity(100,percent);
+    assembly.flip_toggle_to_red();
+
+    chassis.drive_distance(6.5);
+
+    assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+
+    chassis.right_swing_to_angle(270); //swing into cup
+    chassis.drive_distance(7, {.timeout = 700});
+
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.1,seconds);
+    assembly.claw.open();
+    wait(0.75,seconds);
+
+    chassis.drive_distance(-2);
+    wait(0.1,seconds);
+    chassis.drive_distance(1.75);
+    chassis.drive_distance(-8.5,{.heading=180});
+    chassis.turn_to_angle(225);
+    chassis.drive_distance(18.75);
+    chassis.right_swing_to_angle(180,{.timeout = 500}); //get to side pin
+    chassis.drive_distance(1,{.timeout = 100});
+    assembly.claw.close();
+    wait(0.15,seconds);
+    
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    chassis.turn_to_angle(260,{.timeout = 500});
+    chassis.drive_distance(-16,{.heading=180});
+    chassis.turn_to_angle(270);
+    chassis.drive_distance(9.4, {.timeout = 500}); //align with goal
+    
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
+    wait(0.15,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds); //drop stack on
+    chassis.drive_distance(-10, {.heading=270});
+
+    // chassis.drive_distance(-6, {.heading=90});
+    // chassis.turn_to_angle(241);
+    // chassis.drive_distance(29.5,{.heading = 241});
+    // chassis.right_swing_to_angle(180,{.timeout = 450, .min_voltage = 12});
+    // chassis.drive_distance(1.5,{.timeout = 100});
+    // assembly.claw.close();
+    // wait(0.15,seconds);
+    // assembly.sixbar_left.spinFor(fwd, 0.4, rev, 7, volt, false);
+    // assembly.sixbar_right.spinFor(reverse, 0.4, rev, 7, volt, false);
+    // chassis.drive_distance(1,{.heading = 180});
+    // chassis.turn_to_angle(0); 
+
+    // chassis.drive_distance(15,{.timeout=300});
+    // assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
+    // assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
+    // wait(0.15,seconds);
+    // assembly.claw.open(); // final
+
+    return "";
+}
+
+std::string red_left_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+    if (get_name) return "su: left on roller touching";
+
+    if (calibrate) {
+        chassis.set_coordinates(-66.013, -8.701, 0);
+
+        return "";
+    }
+
+    assembly.toggle.setVelocity(100,percent);
+    assembly.flip_toggle_to_red();
+
+    chassis.drive_distance(7);
+
+    assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+
+    chassis.left_swing_to_angle(90); //swing into cup
+    chassis.drive_distance(5.25, {.timeout = 525});
+
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.1,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds);
+
+    chassis.drive_distance(-7,{.heading=180});
+    chassis.turn_to_angle(135);
+    chassis.drive_distance(18.75);
+    chassis.left_swing_to_angle(180,{.timeout = 500}); //get to side pin
+    chassis.drive_distance(1,{.timeout = 100});
+    assembly.claw.close();
+    wait(0.15,seconds);
+    
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    chassis.turn_to_angle(100,{.timeout = 500});
+    chassis.drive_distance(-16,{.heading=180});
+    chassis.turn_to_angle(90);
+    chassis.drive_distance(10, {.timeout = 500}); //align with goal
+    
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
+    wait(0.15,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds); //drop stack on
+
+    chassis.drive_distance(-6, {.heading=90});
+    chassis.turn_to_angle(241);
+    chassis.drive_distance(29.5,{.heading = 241});
+    chassis.right_swing_to_angle(180,{.timeout = 450, .min_voltage = 12});
+    chassis.drive_distance(1.5,{.timeout = 100});
+    assembly.claw.close();
+    wait(0.15,seconds);
+    assembly.sixbar_left.spinFor(fwd, 0.4, rev, 7, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.4, rev, 7, volt, false);
+    chassis.drive_distance(1,{.heading = 180});
+    chassis.turn_to_angle(0); 
+
+    chassis.drive_distance(15,{.timeout=300});
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
+    wait(0.15,seconds);
+    assembly.claw.open(); // final
+
+    return "";
+}
+
+
 std::string blue_left_elim(bool calibrate, auto_variation var, bool get_name) {
     if (get_name) return "blue left elim";
 
@@ -127,35 +487,73 @@ std::string blue_left_elim(bool calibrate, auto_variation var, bool get_name) {
 
     return "";
 }
-std::string blue_right_winpoint(bool calibrate, auto_variation var, bool get_name) {
-    if (get_name) return "blue right winpoint";
 
-    // Mirror autons here
+// Odometry version, start is (0, 0) facing 0
+std::string blue_right_winpointV1(bool calibrate, auto_variation var, bool get_name) {
+    if (get_name) return "blue_right_winpointV1";
 
     if (calibrate) {
-        // Run startup sequence that you want in pre-auton, do before field controller plug in
-        // chassis.set_coordinates(0, 0, 0);
+        chassis.set_coordinates(0, 0, 0);
 
         return "";
     }
 
-    // Place start of autonoumous here
+    assembly.toggle.setVelocity(100,percent);
+    assembly.toggle.spinFor(1,rev);
+    wait(0.1,seconds);
+    assembly.toggle.spinFor(1.25,rev);
+    chassis.drive_to_point(0, 7, {.timeout = 800});
 
-    return "";
-}
-std::string blue_right_sawp(bool calibrate, auto_variation var, bool get_name) {
-    if (get_name) return "blue right sawp";
+    assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
 
-    // Mirror autons here
+    chassis.right_swing_to_angle(270, {.timeout = 1500}); //swing into cup
+    chassis.drive_to_point(-11.25, 13, {.max_voltage = 10, .timeout = 1000});
 
-    if (calibrate) {
-        // Run startup sequence that you want in pre-auton, do before field controller plug in
-        // chassis.set_coordinates(0, 0, 0);
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.15,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds);
 
-        return "";
-    }
+    chassis.drive_distance(-7);
+    chassis.turn_to_point(-17.5, -0.3, {.timeout = 1000});
+    chassis.drive_to_point(-17.5, -0.3, {.max_voltage = 7, .timeout = 2000});
+    chassis.right_swing_to_angle(180, {.timeout = 500}); //get to side pin
+    chassis.drive_distance(1, {.timeout = 100});
+    assembly.claw.close();
+    wait(0.3,seconds);
 
-    // Place start of autonoumous here
+    chassis.drive_distance(-1, {.timeout = 100});
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    chassis.turn_to_point(-3.5, -2.7, {.timeout = 500});
+    chassis.drive_to_point(-3.5, -2.7, {.timeout = 1500});
+    chassis.turn_to_point(-13.5, -2.7, {.timeout = 800});
+    chassis.drive_to_point(-13.5, -2.7, {.timeout = 500}); //align with goal
+
+    // assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    // assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
+    // wait(0.3,seconds);
+    // assembly.claw.open();
+    // wait(0.1,seconds); //drop stack on
+
+    // chassis.drive_to_point(-7.5, -2.7, {.direction = vex::directionType::rev, .timeout = 900});
+    // chassis.turn_to_point(10.3, -17, {.timeout = 1200});
+    // chassis.drive_to_point(10.3, -17, {.timeout = 2500});
+    // chassis.left_swing_to_angle(180, {.timeout = 450, .min_voltage = 12});
+    // chassis.drive_distance(1.5, {.timeout = 100});
+    // assembly.claw.close();
+    // wait(0.3,seconds);
+    // assembly.sixbar_left.spinFor(fwd, 0.4, rev, 7, volt, false);
+    // assembly.sixbar_right.spinFor(reverse, 0.4, rev, 7, volt, false);
+    // chassis.drive_distance(1, {.timeout = 300});
+    // chassis.turn_to_angle(0, {.timeout = 1200});
+
+    // chassis.drive_distance(15, {.timeout = 300});
+    // assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
+    // assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
+    // assembly.claw.open(); // final
 
     return "";
 }
@@ -279,11 +677,57 @@ std::string skills(bool calibrate, auto_variation var, bool get_name) {
 
     if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-
+         chassis.set_coordinates(-66.013, -8.701, 0);
         return "";
     }
 
     // Place start of autonoumous here
+    assembly.toggle.setVelocity(100,percent);
+    assembly.flip_toggle_to_red();
+
+    wait(0.15,seconds);
+
+    chassis.drive_distance(7);
+
+    assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+
+    chassis.left_swing_to_angle(90); //swing into cup
+    chassis.drive_distance(5.25, {.timeout = 525});
+
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.1,seconds);
+    assembly.claw.open();
+    wait(0.1,seconds);
+
+    chassis.drive_distance(-7,{.heading=180});
+    chassis.turn_to_angle(135);
+    chassis.drive_distance(18.75);
+    chassis.left_swing_to_angle(180,{.timeout = 500}); //get to side pin
+    chassis.drive_distance(1,{.timeout = 100});
+    assembly.claw.close();
+    wait(0.15,seconds);
+    
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    chassis.turn_to_angle(100,{.timeout = 500});
+    chassis.drive_distance(-16,{.heading=180});
+    chassis.turn_to_angle(90);
+    chassis.drive_distance(10, {.timeout = 500}); //align with goal
+    
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
+    wait(0.15,seconds);
+    assembly.claw.open();
+    wait(0.3,seconds);
+
+    chassis.drive_distance(-10);
+    wait(0.1,seconds);
+    chassis.turn_to_angle(0);
+    wait(0.1,seconds);
+    chassis.drive_distance(35);
+
 
     return "";
 }

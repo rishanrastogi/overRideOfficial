@@ -18,19 +18,19 @@ void UI_auton_screen::queue_autons(bool calibrating, bool set_description) {
     if (off_skills) { output = skills(calibrating, var, set_description); return; }
 
     if (!red_blue && !rings_goal && !quals_elims && !off_sawp) { output = blue_left_winpoint(calibrating, var, set_description); return; }
-    if (!red_blue && !rings_goal && !quals_elims &&  off_sawp) { output = left_two_goalpin(calibrating, var, set_description); return; }
+    if (!red_blue && !rings_goal && !quals_elims &&  off_sawp) { output = blue_left_two_goalpin(calibrating, var, set_description); return; }
     if (!red_blue && !rings_goal &&  quals_elims && !off_sawp) { output = blue_left_elim(calibrating, var, set_description); return; }
 
-    if (!red_blue &&  rings_goal && !quals_elims && !off_sawp) { output = blue_right_winpoint(calibrating, var, set_description); return; }
-    if (!red_blue &&  rings_goal && !quals_elims &&  off_sawp) { output = blue_right_sawp(calibrating, var, set_description); return; }
+    if (!red_blue &&  rings_goal && !quals_elims && !off_sawp) { output = blue_right_winpointV1(calibrating, var, set_description); return; }
+    if (!red_blue &&  rings_goal && !quals_elims &&  off_sawp) { output = blue_right_two_goalpin(calibrating, var, set_description); return; }
     if (!red_blue &&  rings_goal &&  quals_elims && !off_sawp) { output = blue_right_elim(calibrating, var, set_description); return; }
 
     if ( red_blue && !rings_goal && !quals_elims && !off_sawp) { output = red_left_winpoint(calibrating, var, set_description); return; }
-    if ( red_blue && !rings_goal && !quals_elims &&  off_sawp) { output = red_left_sawp(calibrating, var, set_description); return; }
+    if ( red_blue && !rings_goal && !quals_elims &&  off_sawp) { output = red_left_two_goalpin(calibrating, var, set_description); return; }
     if ( red_blue && !rings_goal &&  quals_elims && !off_sawp) { output = red_left_elim(calibrating, var, set_description); return; }
 
     if ( red_blue &&  rings_goal && !quals_elims && !off_sawp) { output = red_right_winpoint(calibrating, var, set_description); return; }
-    if ( red_blue &&  rings_goal && !quals_elims &&  off_sawp) { output = red_right_sawp(calibrating, var, set_description); return; }
+    if ( red_blue &&  rings_goal && !quals_elims &&  off_sawp) { output = red_right_two_goalpin(calibrating, var, set_description); return; }
     if ( red_blue &&  rings_goal &&  quals_elims && !off_sawp) { output = red_right_elim(calibrating, var, set_description); return; }
 }
 

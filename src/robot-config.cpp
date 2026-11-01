@@ -15,15 +15,6 @@ Chassis chassis(
         mik::motor(PORT19, true, blue_6_1, "right front motor"),
         mik::motor(PORT18, true, blue_6_1, "right back motor"),
     }),
-    // mik::motor_group({
-    //     mik::motor(PORT1, true, blue_6_1, "left front motor"), 
-    //     mik::motor(PORT2, true, blue_6_1, "left back motor"),
-    // }),
-    // // Right drivetrain motors
-    // mik::motor_group({
-    //     mik::motor(PORT9, false, blue_6_1, "right front motor"),
-    //     mik::motor(PORT10, false, blue_6_1, "right back motor"),
-    // }),
 	
     PORT10,  // Inertial sensor port
     361,    // Inertial scale (rotation reading after a full 360° turn)
@@ -61,18 +52,6 @@ Chassis chassis(
 // });
 
 
-//Cascade Motors
-// mik::motor Assembly::cascade_motorL1(PORT11, false, blue_6_1, "cascade_motorL1");
-// mik::motor Assembly::cascade_motorL2(PORT12, true, blue_6_1, "cascade_motorL2");
-// mik::motor Assembly::cascade_motorR1(PORT19, false, blue_6_1, "cascade_motorR1");
-// mik::motor Assembly::cascade_motorR2(PORT20, true, blue_6_1, "cascade_motorR2");
-
-// Groups share the motors above (pointer overload) instead of copying them.
-// The explicit vector type is required: a bare {&a, &b} is ambiguous with the
-// const std::vector<mik::motor>& overload.
-// mik::motor_group Assembly::cascade_right(std::vector<mik::motor*>{&cascade_motorR1, &cascade_motorR2});
-// mik::motor_group Assembly::cascade_left(std::vector<mik::motor*>{&cascade_motorL1, &cascade_motorL2});	
-
 /* Creating alternative vex devices in assembly */
 mik::piston Assembly::claw(PORT_H, false); 
 mik::motor Assembly::sixbar_motorL1(PORT17, true, red_36_1, "sixbar_motorL");
@@ -84,6 +63,13 @@ mik::motor_group Assembly::sixbar_right(std::vector<mik::motor*>{&sixbar_motorR1
 mik::motor_group Assembly::sixbar_left(std::vector<mik::motor*>{&sixbar_motorL1, &sixbar_motorL2});	
 
 mik::motor Assembly::toggle(PORT8, false, green_18_1, "toggle_motor");
+
+// id, red, green, blue, hue range, saturation range. Replace with the values from the AI Vision Utility.
+vex::aivision::colordesc Assembly::red_toggle(2, 223, 73, 186, 40, 1);
+vex::aivision::colordesc Assembly::blue_toggle(3, 87, 150, 249, 40,1);
+vex::aivision::colordesc Assembly::yellow_toggle(1, 163, 171, 154, 40, 1);
+vex::aivision Assembly::ai_vision(PORT9, red_toggle, blue_toggle, yellow_toggle);
+
 
 
 Assembly assembly;
