@@ -64,6 +64,9 @@ mik::motor_group Assembly::sixbar_left(std::vector<mik::motor*>{&sixbar_motorL1,
 
 mik::motor Assembly::toggle(PORT8, false, green_18_1, "toggle_motor");
 
+// Distance sensor on the clamp
+vex::distance Assembly::clamp_distance(PORT7);
+
 // id, red, green, blue, hue range, saturation range. Replace with the values from the AI Vision Utility.
 vex::aivision::colordesc Assembly::red_toggle(2, 223, 73, 186, 40, 1);
 vex::aivision::colordesc Assembly::blue_toggle(3, 87, 150, 249, 40,1);

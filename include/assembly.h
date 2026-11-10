@@ -38,6 +38,9 @@ public:
 
     static mik::piston claw;
 
+    // Distance sensor on the clamp
+    static vex::distance clamp_distance;
+
     // AI Vision: looks for the toggle's color. Colors are tuned in the AI Vision Utility.
     static vex::aivision::colordesc red_toggle;
     static vex::aivision::colordesc blue_toggle;

@@ -544,6 +544,11 @@ int run_diagnostic() {
 			errors++;
 		}
 	}
+	if (!assembly.clamp_distance.installed()) {
+		std::string port = port_to_string(assembly.clamp_distance.index());
+		error_data.push_back("Clamp Distance [" + port + "] is disconnected");
+		errors++;
+	}
 	if (errors <= 0) {
 		error_data.push_back("No issues found");
 	}

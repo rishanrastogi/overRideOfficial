@@ -152,10 +152,15 @@ void Assembly::toggleControl(){
 // Smallest bounding box (pixels^2) that counts as the toggle, so stray specks of color are ignored.
 static const int toggle_min_area = 35000;
 
+// Max time (ms) a toggle flip may spin before giving up and moving on with the auton.
+static const int toggle_flip_timeout_ms = 1500;
+
 // For autons. Spins the toggle until the camera sees red, then stops and holds.
 // Yellow, blue, or nothing in view (mid-flip) all keep it spinning.
 void Assembly::flip_toggle_to_red() {
+    vex::timer flip_timer;  // gives up after toggle_flip_timeout_ms so a missing/mistuned camera can't stall the auton
     while (!(ai_vision.takeSnapshot(red_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
+        if (flip_timer.time(msec) >= toggle_flip_timeout_ms) break;
         toggle.spin(fwd, 12, volt);
         vex::task::sleep(20);
     }
@@ -174,7 +179,9 @@ void Assembly::flip_toggle_to_red() {
 // }
 
 void Assembly::flip_toggle_to_blue() {
+    vex::timer flip_timer;  // gives up after toggle_flip_timeout_ms so a missing/mistuned camera can't stall the auton
     while (!(ai_vision.takeSnapshot(blue_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
+        if (flip_timer.time(msec) >= toggle_flip_timeout_ms) break;
         toggle.spin(fwd, 12, volt);
         vex::task::sleep(20);
     }
