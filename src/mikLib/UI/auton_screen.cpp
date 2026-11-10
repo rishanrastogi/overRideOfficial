@@ -1,5 +1,6 @@
 #include "mikLib/ui.h"
 #include "mikLib/drive.h"
+#include "assembly.h"
 #include <cstdio>
 #include <cctype>
 
@@ -73,7 +74,9 @@ void UI_auton_screen::start_auton_test() {
         Controller.Screen.setCursor(1, 1);
         Controller.Screen.print("Auton in progess... ");
         auton_scr->auto_start_time = Brain.Timer.time(vex::timeUnits::msec);
+        assembly.start_auto_clamp();
         auton_scr->queue_autons(false, false);
+        assembly.stop_auto_clamp();
 
         auton_scr->auto_running = false;
         auton_scr->end_card = true;
@@ -120,6 +123,7 @@ void UI_auton_screen::exit_auton_task() {
                 auton_scr->auto_running = false;
                 auton_scr->end_card = true;
                 auton_scr->auton_run.stop();
+                assembly.stop_auto_clamp();  // auton cancelled with B
             }
         }
         task::sleep(50);
@@ -405,6 +409,7 @@ void UI_auton_screen::start_time_limit() {
                     chassis.stop_drive(vex::brakeType::hold);
                     chassis.set_brake_type(vex::brakeType::coast); 
                     auton_scr->auton_run.stop();
+                    assembly.stop_auto_clamp();  // auton cut off by time cap
                     auton_scr->auto_running = false;
                 }
             }

@@ -681,6 +681,26 @@ std::string skills(bool calibrate, auto_variation var, bool get_name) {
         return "";
     }
 
+    // ---- TEMP: auto-clamp test. Set to false to run the real skills route below. ----
+    const bool auto_clamp_test = true;
+    if (auto_clamp_test) {
+        // Robot does not drive. For 60 s: claw opens, you push a goal in by hand,
+        // auto-clamp should close it (controller rumbles). 3 s later the claw opens
+        // again with the goal still there: it must NOT re-grab until you pull the goal
+        // back past 120 mm, then push it in again.
+        assembly.claw_release();
+        vex::timer test_timer;
+        while (test_timer.time(sec) < 60) {
+            if (!assembly.claw_is_open()) {  // claw closed (auto-clamp fired)
+                wait(3, seconds);
+                assembly.claw_release();     // simulate dropping the goal
+            }
+            wait(20, msec);
+        }
+        return "";
+    }
+    // ---- end TEMP ----
+
     // Place start of autonoumous here
     assembly.toggle.setVelocity(100,percent);
     assembly.flip_toggle_to_red();

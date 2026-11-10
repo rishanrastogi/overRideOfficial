@@ -41,6 +41,20 @@ public:
     // Distance sensor on the clamp
     static vex::distance clamp_distance;
 
+    // The claw piston is plumbed backwards: claw.open() physically CLOSES the claw.
+    // Use these so the names match what the claw actually does.
+    /** @brief Physically closes (clamps) the claw. */
+    static void claw_grab();
+    /** @brief Physically opens (releases) the claw. */
+    static void claw_release();
+    /** @returns True if the claw is physically open. */
+    static bool claw_is_open();
+
+    /** @brief Starts auto-clamp in the background: closes the claw when something reaches the clamp. Used in autons. */
+    void start_auto_clamp();
+    /** @brief Stops auto-clamp. Called when driver control starts. */
+    void stop_auto_clamp();
+
     // AI Vision: looks for the toggle's color. Colors are tuned in the AI Vision Utility.
     static vex::aivision::colordesc red_toggle;
     static vex::aivision::colordesc blue_toggle;

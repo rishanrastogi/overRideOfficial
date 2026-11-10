@@ -73,8 +73,6 @@ vex::aivision::colordesc Assembly::blue_toggle(3, 87, 150, 249, 40,1);
 vex::aivision::colordesc Assembly::yellow_toggle(1, 163, 171, 154, 40, 1);
 vex::aivision Assembly::ai_vision(PORT9, red_toggle, blue_toggle, yellow_toggle);
 
-
-
 Assembly assembly;
 Constants constants;
 vex::competition Competition;
