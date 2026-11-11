@@ -201,9 +201,9 @@ void Assembly::flip_toggle_to_blue() {
 // so opening the claw to drop that object never re-grabs it.
 // Auto-clamp only ever closes the claw, never opens it.
 
-static const double clamp_trigger_mm = 20;    // clamp when object is this close (mm)
+static const double clamp_trigger_mm = 50;    // clamp when object is this close (mm)
 static const double clamp_rearm_mm   = 120;   // re-arm once object is farther than this (mm)
-static const int    clamp_trigger_ms = 60;    // object must stay close this long before clamping
+static const int    clamp_trigger_ms = 20;    // object must stay close this long before clamping
 static const int    clamp_rearm_ms   = 300;   // must stay clear this long before re-arming
 static const int    clamp_loop_ms    = 10;
 
@@ -212,10 +212,26 @@ void Assembly::claw_grab()    { claw.open(); }
 void Assembly::claw_release() { claw.close(); }
 bool Assembly::claw_is_open() { return !claw.state(); }
 
+bool Assembly::wait_for_clamp(int timeout_ms) {
+    vex::timer t;
+    while (claw_is_open() && t.time(msec) < timeout_ms) {
+        vex::task::sleep(10);
+    }
+    if (claw_is_open()) {
+        claw_grab();  // sensor didn't see it in time: grab anyway
+        return false;
+    }
+    return true;
+}
+
 static vex::task auto_clamp_task;
 static bool auto_clamp_running = false;
+static volatile bool auto_clamp_arm_request = false;  // set by arm_auto_clamp(), read by the loop
+
+void Assembly::arm_auto_clamp() { auto_clamp_arm_request = true; }
 
 static int auto_clamp_loop() {
+    auto_clamp_arm_request = false;  // ignore requests left over from a previous run
     bool armed = true;
     int close_time = 0;
     int clear_time = 0;
@@ -226,6 +242,14 @@ static int auto_clamp_loop() {
         bool object_close = detected && dist <= clamp_trigger_mm;
         bool object_clear = !detected || dist > clamp_rearm_mm;
         bool claw_open = Assembly::claw_is_open();
+
+        if (auto_clamp_arm_request) {
+            // Auton says we've left the last goal: arm now instead of waiting to see clear
+            auto_clamp_arm_request = false;
+            armed = true;
+            close_time = 0;
+            clear_time = 0;
+        }
 
         if (!claw_open && !object_clear) {
             // Claw is holding something: don't re-grab it when it gets opened

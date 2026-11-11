@@ -675,79 +675,128 @@ std::string skills(bool calibrate, auto_variation var, bool get_name) {
 
     // Mirror autons here
 
-    if (calibrate) {
+if (calibrate) {
         // Run startup sequence that you want in pre-auton, do before field controller plug in
-         chassis.set_coordinates(-66.013, -8.701, 0);
+         chassis.set_coordinates(-65.848, -9.125, 90);
         return "";
     }
 
-    // ---- TEMP: auto-clamp test. Set to false to run the real skills route below. ----
-    const bool auto_clamp_test = true;
-    if (auto_clamp_test) {
-        // Robot does not drive. For 60 s: claw opens, you push a goal in by hand,
-        // auto-clamp should close it (controller rumbles). 3 s later the claw opens
-        // again with the goal still there: it must NOT re-grab until you pull the goal
-        // back past 120 mm, then push it in again.
-        assembly.claw_release();
-        vex::timer test_timer;
-        while (test_timer.time(sec) < 60) {
-            if (!assembly.claw_is_open()) {  // claw closed (auto-clamp fired)
-                wait(3, seconds);
-                assembly.claw_release();     // simulate dropping the goal
-            }
-            wait(20, msec);
-        }
-        return "";
-    }
-    // ---- end TEMP ----
+    // // ---- TEMP: auto-clamp test. Set to false to run the real skills route below. ----
+    // const bool auto_clamp_test = true;
+    // if (auto_clamp_test) {
+    //     // Robot does not drive. For 60 s: claw opens, you push a goal in by hand,
+    //     // auto-clamp should close it (controller rumbles). 3 s later the claw opens
+    //     // again with the goal still there: it must NOT re-grab until you pull the goal
+    //     // back past 120 mm, then push it in again.
+    //     assembly.claw_release();
+    //     vex::timer test_timer;
+    //     while (test_timer.time(sec) < 60) {
+    //         if (!assembly.claw_is_open()) {  // claw closed (auto-clamp fired)
+    //             wait(3, seconds);
+    //             assembly.claw_release();     // simulate dropping the goal
+    //         }
+    //         wait(20, msec);
+    //     }
+    //     return "";
+    // }
+    // // ---- end TEMP ----
 
     // Place start of autonoumous here
+    assembly.claw_grab(); // hold the preload (claw starts physically open at power-on)
     assembly.toggle.setVelocity(100,percent);
     assembly.flip_toggle_to_red();
 
-    wait(0.15,seconds);
-
-    chassis.drive_distance(7);
-
+    chassis.drive_to_point(-57.5, -9.25);
     assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
-
-    chassis.left_swing_to_angle(90); //swing into cup
-    chassis.drive_distance(5.25, {.timeout = 525});
+    chassis.left_swing_to_angle(180);
+    chassis.drive_distance(10, {.max_voltage = 8, .timeout = 750});
+    chassis.drive_distance(-0.5, {.timeout = 300});
 
     assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
     assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
     wait(0.1,seconds);
-    assembly.claw.open();
+    assembly.claw_release(); // drop preload on cup. Auto-clamp won't re-grab it: re-arms once we back off 120 mm
     wait(0.1,seconds);
 
-    chassis.drive_distance(-7,{.heading=180});
-    chassis.turn_to_angle(135);
-    chassis.drive_distance(18.75);
-    chassis.left_swing_to_angle(180,{.timeout = 500}); //get to side pin
-    chassis.drive_distance(1,{.timeout = 100});
-    assembly.claw.close();
-    wait(0.15,seconds);
-    
+    chassis.drive_distance(-6,{.heading = 180});
+    chassis.turn_to_point(-27.5, -28.75);
+    assembly.arm_auto_clamp(); // turned away from the dropped preload: ready to grab the next one
+    chassis.drive_distance(17.5);
+    chassis.drive_distance(7.5,{.max_voltage = 4});
+    assembly.wait_for_clamp(300); // auto-clamp grabs the freestanding one; forces the grab after 300 ms
+    // chassis.drive_to_point(-26.5, -25.5, {.max_voltage = 8}); // get to first freestanding one
+
     assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
-    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
-    chassis.turn_to_angle(100,{.timeout = 500});
-    chassis.drive_distance(-16,{.heading=180});
-    chassis.turn_to_angle(90);
-    chassis.drive_distance(10, {.timeout = 500}); //align with goal
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt, false);
+    chassis.turn_to_point(-41.75, -28.75);
+    chassis.drive_distance(30,{.max_voltage = 8, .timeout = 1000});
+
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.1,seconds);
+    assembly.claw_release(); // drop first stack on cup. Auto-clamp won't re-grab it: re-arms once we back off 120 mm
+    wait(0.1,seconds);
+
+    chassis.drive_distance(-12,{.heading=180});
+    chassis.turn_to_point(-45.5,-41.85);
+    assembly.arm_auto_clamp(); // turned away from the dropped stack: ready to grab the next one
+    chassis.drive_to_point(-45.5,-41.85);
+    chassis.drive_distance(5,{.max_voltage = 4});
+    assembly.wait_for_clamp(300); // auto-clamp grabs the second freestanding one; forces the grab after 300 ms
+
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt, false);
+    chassis.turn_to_point(-47,-30);
+    chassis.drive_distance(30,{.max_voltage = 8, .timeout = 1000});
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    wait(0.1,seconds);
+    assembly.claw_release(); // drop second stack on cup. Auto-clamp won't re-grab it: re-arms once we back off 120 mm
+    wait(0.1,seconds);
+
+    chassis.drive_to_point(-53.5,-58,{.direction = reverse}); // get into the loader
+    chassis.turn_to_angle(270);
+    chassis.drive_distance(10,{.max_voltage = 6});
+
+
+    // wait(0.15,seconds);
+
+    // chassis.drive_distance(7);
+
+    // assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
+    // assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+
+    // chassis.left_swing_to_angle(90); //swing into cup
+    // chassis.drive_distance(5.25, {.timeout = 525});
+
+    // assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
+    // assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    // wait(0.1,seconds);
+    // assembly.claw_release(); // drop preload on cup. Auto-clamp won't re-grab it: re-arms once we back off 120 mm
+    // wait(0.1,seconds);
+
+    // chassis.drive_distance(-7,{.heading=180});
+    // chassis.turn_to_angle(135);
+    // chassis.drive_distance(18.75);
+    // chassis.left_swing_to_angle(180,{.timeout = 500}); //get to side pin
+    // chassis.drive_distance(1,{.timeout = 100});
+    // assembly.wait_for_clamp(300); // auto-clamp grabs the pin as soon as it's in; forces the grab after 300 ms
+    // wait(0.15,seconds);
     
-    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
-    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
-    wait(0.15,seconds);
-    assembly.claw.open();
-    wait(0.3,seconds);
+    // assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
+    // assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    // chassis.turn_to_angle(100,{.timeout = 500});
+    // chassis.drive_distance(-16,{.heading=180});
+    // chassis.turn_to_angle(90);
+    // chassis.drive_distance(10, {.timeout = 500}); //align with goal
+    
+    // assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    // assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
+    // wait(0.15,seconds);
+    // assembly.claw_release(); // drop stack on goal
+    // wait(0.3,seconds);
 
-    chassis.drive_distance(-10);
-    wait(0.1,seconds);
-    chassis.turn_to_angle(0);
-    wait(0.1,seconds);
-    chassis.drive_distance(35);
-
-
+    // chassis.drive
     return "";
 }

@@ -50,6 +50,19 @@ public:
     /** @returns True if the claw is physically open. */
     static bool claw_is_open();
 
+    /**
+     * @brief For autons: waits for auto-clamp to grab, up to timeout_ms.
+     * If nothing triggered it by then, grabs anyway so the auton never misses.
+     * @returns True if auto-clamp grabbed on its own, false if it had to force the grab.
+     */
+    static bool wait_for_clamp(int timeout_ms);
+
+    /**
+     * @brief For autons: re-arms auto-clamp right now, without waiting for the sensor to see clear.
+     * Call after backing off and turning away from a goal you just dropped.
+     */
+    static void arm_auto_clamp();
+
     /** @brief Starts auto-clamp in the background: closes the claw when something reaches the clamp. Used in autons. */
     void start_auto_clamp();
     /** @brief Stops auto-clamp. Called when driver control starts. */
