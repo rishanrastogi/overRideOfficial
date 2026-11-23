@@ -61,7 +61,39 @@ void UI_auton_screen::start_auton() {
     if (!robot_is_calibrated) {
         queue_autons(true, false);
     }
+    start_odom_display();
     queue_autons(false, false);
+    stop_odom_display();
+}
+
+void UI_auton_screen::start_odom_display() {
+    odom_display_task.stop();
+    odom_display_task = vex::task([](){
+        Controller.Screen.clearScreen();
+        char line[32];
+        while (true) {
+            // The controller screen only takes one update every ~50 ms, so write one row per cycle
+            snprintf(line, sizeof(line), "X: %-16.2f", chassis.get_X_position());
+            Controller.Screen.setCursor(1, 1);
+            Controller.Screen.print(line);
+            vex::task::sleep(50);
+
+            snprintf(line, sizeof(line), "Y: %-16.2f", chassis.get_Y_position());
+            Controller.Screen.setCursor(2, 1);
+            Controller.Screen.print(line);
+            vex::task::sleep(50);
+
+            snprintf(line, sizeof(line), "H: %-16.2f", chassis.get_absolute_heading());
+            Controller.Screen.setCursor(3, 1);
+            Controller.Screen.print(line);
+            vex::task::sleep(50);
+        }
+        return 0;
+    });
+}
+
+void UI_auton_screen::stop_odom_display() {
+    odom_display_task.stop();
 }
 
 void UI_auton_screen::start_auton_test() {
@@ -70,13 +102,12 @@ void UI_auton_screen::start_auton_test() {
         auton_scr->exit_auton_task();
         disable_user_control(true);
         auton_scr->auto_running = true;
-        Controller.Screen.clearScreen();
-        Controller.Screen.setCursor(1, 1);
-        Controller.Screen.print("Auton in progess... ");
+        auton_scr->start_odom_display();
         auton_scr->auto_start_time = Brain.Timer.time(vex::timeUnits::msec);
-        assembly.start_auto_clamp();
+        // assembly.start_auto_clamp();
         auton_scr->queue_autons(false, false);
-        assembly.stop_auto_clamp();
+        auton_scr->stop_odom_display();
+        // assembly.stop_auto_clamp();
 
         auton_scr->auto_running = false;
         auton_scr->end_card = true;
@@ -123,7 +154,8 @@ void UI_auton_screen::exit_auton_task() {
                 auton_scr->auto_running = false;
                 auton_scr->end_card = true;
                 auton_scr->auton_run.stop();
-                assembly.stop_auto_clamp();  // auton cancelled with B
+                auton_scr->stop_odom_display();
+                // assembly.stop_auto_clamp();  // auton cancelled with B
             }
         }
         task::sleep(50);
@@ -409,7 +441,7 @@ void UI_auton_screen::start_time_limit() {
                     chassis.stop_drive(vex::brakeType::hold);
                     chassis.set_brake_type(vex::brakeType::coast); 
                     auton_scr->auton_run.stop();
-                    assembly.stop_auto_clamp();  // auton cut off by time cap
+                    // assembly.stop_auto_clamp();  // auton cut off by time cap
                     auton_scr->auto_running = false;
                 }
             }

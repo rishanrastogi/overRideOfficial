@@ -24,7 +24,13 @@ public:
      * and current ran auto can be stopped by pressing the B button on controller
      */
     void start_auton_test();
-    
+
+    /** @brief Shows live X, Y and heading on the controller screen while an auton runs */
+    void start_odom_display();
+
+    /** @brief Stops the live position display, leaving the last values on screen */
+    void stop_odom_display();
+
     /** @brief When start auton test is ran the auto will cutoff when 15 second time limit is reached
      * time limit is set to 60 seconds during skills
      */
@@ -101,7 +107,8 @@ private:
     vex::task controller_scr_overlay;
     vex::task controller_scr_input;
     vex::task auton_run;
-    
+    vex::task odom_display_task;
+
     std::string output;
     std::string description_output;
     auto_variation var = auto_variation::ONE;

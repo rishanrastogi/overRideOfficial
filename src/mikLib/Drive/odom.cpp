@@ -22,6 +22,10 @@ void odom::update_position(float forward_tracker_position, float sideways_tracke
     float orientation_rad = to_rad(orientation_deg);
     float prev_orientation_rad = to_rad(this->orientation_deg);
     float orientation_delta_rad = orientation_rad - prev_orientation_rad;
+    // Heading comes in wrapped to [0, 360). When the robot crosses 0/360 the raw
+    // delta is ~±360°, which corrupts that tick's arc math. Wrap it to [-π, π].
+    if (orientation_delta_rad > M_PI) orientation_delta_rad -= 2 * M_PI;
+    else if (orientation_delta_rad < -M_PI) orientation_delta_rad += 2 * M_PI;
 
     this->orientation_deg = orientation_deg;
     

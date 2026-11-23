@@ -28,7 +28,7 @@ void pre_auton() {
 
 void auton(void) {
     UI.stop();
-    assembly.start_auto_clamp();
+    // assembly.start_auto_clamp();
     auton_scr->start_auton();
 }
 
@@ -36,7 +36,10 @@ void user_control(void) {
     while (chassis.calibrating) { task::sleep(50); }
 
     // Auto-clamp is for autons only; switch it off for driver
-    assembly.stop_auto_clamp();
+    // assembly.stop_auto_clamp();
+
+    // If auton was cut off by the field, stop the live position display
+    auton_scr->stop_odom_display();
 
     // How you want your drivetrain to stop during driver
     chassis.set_brake_type(brakeType::coast);
