@@ -43,17 +43,17 @@ public:
     // Distance sensor on the clamp (auto-clamp disabled)
     // static vex::distance clamp_distance;
 
-    // Claw is a motor that always spins: forward = open, reverse = closed.
+    // Claw motor: open = spins forward nonstop, closed = spins reverse for 1.5 s then stops.
     // These just change its direction and return right away.
-    /** @brief Closes (clamps) the claw. */
+    /** @brief Grabs: spins the claw forward nonstop. */
     static void claw_grab();
-    /** @brief Opens (releases) the claw. */
+    /** @brief Releases: spins the claw reverse for 1.5 s, then stops. */
     static void claw_release();
     /** @brief Opens the claw if it's closed, closes it if it's open. */
     static void claw_toggle();
     /** @returns True if the claw was last commanded open. */
     static bool claw_is_open();
-    /** @brief Starts the claw spinning in its current direction (driver control calls this every loop). */
+    /** @brief Keeps the claw spinning in its current direction (driver control calls this every loop). */
     static void claw_keep_spinning();
 
 //     /**

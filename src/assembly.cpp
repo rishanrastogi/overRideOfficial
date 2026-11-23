@@ -97,8 +97,7 @@ void Assembly::control() {
 //     }
 // }
 
-// X flips which way the claw spins: open (forward) <-> closed (reverse).
-// The claw keeps spinning the whole time; it never stops.
+// X flips the claw: open (spins forward nonstop) <-> closed (spins reverse for 1.5 s, then stops).
 void Assembly::clawControl() {
     // Local edge detector: the btn*_new_press macros share one static per
     // button across the whole program, and the UI task already uses them.
@@ -112,7 +111,8 @@ void Assembly::clawControl() {
     }
     prev_x = x;
 
-    // Re-apply every loop, so the claw is spinning even if something stopped all motors
+    // Re-apply every loop, so the claw keeps going even if something stopped all motors
+    // (doesn't restart the reverse spin once its 1.5 s is up)
     claw_keep_spinning();
 }
 
@@ -184,23 +184,47 @@ void Assembly::flip_toggle_to_blue() {
 
 
 // ---------------- Claw motor ----------------
-// The claw motor never stops: it spins forward (open) or reverse (closed),
-// and grab/release/X only change which way it pushes.
-static const double claw_volts = 12;  // voltage the claw always spins at
+// Open: spins forward and never stops.
+// Closed: spins reverse for claw_close_ms, then stops (holding) so it isn't stalled the whole match.
+// grab/release/X change the direction; a new command restarts the close timer.
+static const double claw_volts    = 12;    // voltage the claw spins at
+static const int    claw_close_ms = 1500;  // how long reverse (close) spins before stopping
 
 static bool claw_open_state = true;   // claw starts physically open at power-on
+static bool claw_close_done = false;  // true once reverse has run its claw_close_ms and stopped
+static int  claw_move_id = 0;         // bumps on every command, so an old timer can't stop a newer move
 
 static void claw_spin() {
-    Assembly::claw.spin(claw_open_state ? fwd : reverse, claw_volts, volt);
+    if (claw_open_state) {
+        Assembly::claw.spin(fwd, claw_volts, volt);
+    } else if (!claw_close_done) {
+        Assembly::claw.spin(reverse, claw_volts, volt);
+    }
+}
+
+// Background timer: stops the reverse spin after claw_close_ms, unless a newer command replaced it.
+static int claw_stop_after_close(void* arg) {
+    int my_id = (int)(intptr_t)arg;
+    vex::task::sleep(claw_close_ms);
+    if (my_id == claw_move_id) {
+        claw_close_done = true;
+        Assembly::claw.stop(vex::brakeType::hold);
+    }
+    return 0;
 }
 
 static void claw_move(bool open) {
     claw_open_state = open;
+    claw_close_done = false;
+    claw_move_id++;
     claw_spin();
+    if (!open) {
+        vex::task(claw_stop_after_close, (void*)(intptr_t)claw_move_id);
+    }
 }
 
-void Assembly::claw_grab()    { claw_move(false); }
-void Assembly::claw_release() { claw_move(true); }
+void Assembly::claw_grab()    { claw_move(true); }   // spins forward nonstop
+void Assembly::claw_release() { claw_move(false); }  // spins reverse for claw_close_ms, then stops
 void Assembly::claw_toggle()  { claw_move(!claw_open_state); }
 bool Assembly::claw_is_open() { return claw_open_state; }
 void Assembly::claw_keep_spinning() { claw_spin(); }
