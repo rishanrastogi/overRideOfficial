@@ -53,6 +53,7 @@ Chassis chassis(
 
 
 /* Creating alternative vex devices in assembly */
+mik::piston Assembly::claw(PORT_H, false); 
 mik::motor Assembly::sixbar_motorL1(PORT17, true, red_36_1, "sixbar_motorL");
 mik::motor Assembly::sixbar_motorR1(PORT14, true, red_36_1, "sixbar_motorR");
 mik::motor Assembly::sixbar_motorL2(PORT16, false, green_18_1, "sixbar_motorL");
@@ -62,15 +63,11 @@ mik::motor_group Assembly::sixbar_right(std::vector<mik::motor*>{&sixbar_motorR1
 mik::motor_group Assembly::sixbar_left(std::vector<mik::motor*>{&sixbar_motorL1, &sixbar_motorL2});	
 
 mik::motor Assembly::toggle(PORT8, false, green_18_1, "toggle_motor");
-// Old piston claw, replaced by the claw motor below
-// mik::piston Assembly::claw(PORT_H, false);
-// TODO: set the claw motor's real port, direction and cartridge
-mik::motor Assembly::claw(PORT7, false, green_18_1, "claw_motor");
 
-// Distance sensor on the clamp (auto-clamp disabled)
-// vex::distance Assembly::clamp_distance(PORT7);
+// Distance sensor on the clamp
+vex::distance Assembly::clamp_distance(PORT7);
 
-// id, red, green, blue, hue range, saturation range. Replace with the values from the AI Vision Utility.
+// id, red, green, blue, hue range, saturation range
 vex::aivision::colordesc Assembly::red_toggle(2, 223, 73, 186, 40, 1);
 vex::aivision::colordesc Assembly::blue_toggle(3, 87, 150, 249, 40,1);
 vex::aivision::colordesc Assembly::yellow_toggle(1, 163, 171, 154, 40, 1);

@@ -104,10 +104,10 @@ void UI_auton_screen::start_auton_test() {
         auton_scr->auto_running = true;
         auton_scr->start_odom_display();
         auton_scr->auto_start_time = Brain.Timer.time(vex::timeUnits::msec);
-        // assembly.start_auto_clamp();
+        assembly.start_auto_clamp();
         auton_scr->queue_autons(false, false);
         auton_scr->stop_odom_display();
-        // assembly.stop_auto_clamp();
+        assembly.stop_auto_clamp();
 
         auton_scr->auto_running = false;
         auton_scr->end_card = true;
@@ -155,7 +155,7 @@ void UI_auton_screen::exit_auton_task() {
                 auton_scr->end_card = true;
                 auton_scr->auton_run.stop();
                 auton_scr->stop_odom_display();
-                // assembly.stop_auto_clamp();  // auton cancelled with B
+                assembly.stop_auto_clamp();  // auton cancelled with B
             }
         }
         task::sleep(50);
@@ -441,7 +441,7 @@ void UI_auton_screen::start_time_limit() {
                     chassis.stop_drive(vex::brakeType::hold);
                     chassis.set_brake_type(vex::brakeType::coast); 
                     auton_scr->auton_run.stop();
-                    // assembly.stop_auto_clamp();  // auton cut off by time cap
+                    assembly.stop_auto_clamp();  // auton cut off by time cap
                     auton_scr->auto_running = false;
                 }
             }

@@ -26,7 +26,6 @@ public:
     static mik::motor_group sixbar_right;
 
     static mik::motor toggle;
-    static mik::motor claw;
 
     // Cascade Rotation Sensors
     static vex::rotation rotation_sensorR;
@@ -37,42 +36,37 @@ public:
     static vex::optical optical_sensor;
     static vex::limit limit_switch;
 
-    // Old piston claw, replaced by the claw motor above
-    // static mik::piston claw;
+    static mik::piston claw;
 
-    // Distance sensor on the clamp (auto-clamp disabled)
-    // static vex::distance clamp_distance;
+    // Distance sensor on the clamp
+    static vex::distance clamp_distance;
 
-    // Claw motor: open = spins forward nonstop, closed = spins reverse for 1.5 s then stops.
-    // These just change its direction and return right away.
-    /** @brief Grabs: spins the claw forward nonstop. */
+    // The claw piston is plumbed backwards: claw.open() physically CLOSES the claw.
+    // Use these so the names match what the claw actually does.
+    /** @brief Physically closes (clamps) the claw. */
     static void claw_grab();
-    /** @brief Releases: spins the claw reverse for 1.5 s, then stops. */
+    /** @brief Physically opens (releases) the claw. */
     static void claw_release();
-    /** @brief Opens the claw if it's closed, closes it if it's open. */
-    static void claw_toggle();
-    /** @returns True if the claw was last commanded open. */
+    /** @returns True if the claw is physically open. */
     static bool claw_is_open();
-    /** @brief Keeps the claw spinning in its current direction (driver control calls this every loop). */
-    static void claw_keep_spinning();
 
-//     /**
-//      * @brief For autons: waits for auto-clamp to grab, up to timeout_ms.
-//      * If nothing triggered it by then, grabs anyway so the auton never misses.
-//      * @returns True if auto-clamp grabbed on its own, false if it had to force the grab.
-//      */
-//     static bool wait_for_clamp(int timeout_ms);
+    /**
+     * @brief For autons: waits for auto-clamp to grab, up to timeout_ms.
+     * If nothing triggered it by then, grabs anyway so the auton never misses.
+     * @returns True if auto-clamp grabbed on its own, false if it had to force the grab.
+     */
+    static bool wait_for_clamp(int timeout_ms);
 
-//     /**
-//      * @brief For autons: re-arms auto-clamp right now, without waiting for the sensor to see clear.
-//      * Call after backing off and turning away from a goal you just dropped.
-//      */
-//     static void arm_auto_clamp();
+    /**
+     * @brief For autons: re-arms auto-clamp right now, without waiting for the sensor to see clear.
+     * Call after backing off and turning away from a goal you just dropped.
+     */
+    static void arm_auto_clamp();
 
-//     /** @brief Starts auto-clamp in the background: closes the claw when something reaches the clamp. Used in autons. */
-//     void start_auto_clamp();
-//     /** @brief Stops auto-clamp. Called when driver control starts. */
-//     void stop_auto_clamp();
+    /** @brief Starts auto-clamp in the background: closes the claw when something reaches the clamp. Used in autons. */
+    void start_auto_clamp();
+    /** @brief Stops auto-clamp. Called when driver control starts. */
+    void stop_auto_clamp();
 
     // AI Vision: looks for the toggle's color. Colors are tuned in the AI Vision Utility.
     static vex::aivision::colordesc red_toggle;

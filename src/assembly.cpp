@@ -97,23 +97,31 @@ void Assembly::control() {
 //     }
 // }
 
-// X flips the claw: open (spins forward nonstop) <-> closed (spins reverse for 1.5 s, then stops).
+// Up opens the claw, Down closes it, B flips whichever state it is in.
+// Each acts on the press itself, and the solenoid latches, so the claw stays
+// where it was last commanded instead of needing a button held down.
 void Assembly::clawControl() {
-    // Local edge detector: the btn*_new_press macros share one static per
+    // Local edge detectors: the btn*_new_press macros share one static per
     // button across the whole program, and the UI task already uses them.
     // Start as "already held" so a button still held when driver control begins
     // (e.g. the X press that closes the auton selector) is ignored until released.
-    static bool prev_x = true;
+    static bool prev_up = true, prev_down = true, prev_toggle = true;
 
-    bool x = Controller.ButtonX.pressing();
-    if (x && !prev_x) {
-        claw_toggle();
+    bool up = Controller.ButtonUp.pressing();
+    bool down = Controller.ButtonDown.pressing();
+    bool toggle = Controller.ButtonX.pressing();
+
+    if (up && !prev_up) {
+        claw.open();
+    } else if (down && !prev_down) {
+        claw.close();
+    } else if (toggle && !prev_toggle) {
+        claw.toggle();
     }
-    prev_x = x;
 
-    // Re-apply every loop, so the claw keeps going even if something stopped all motors
-    // (doesn't restart the reverse spin once its 1.5 s is up)
-    claw_keep_spinning();
+    prev_up = up;
+    prev_down = down;
+    prev_toggle = toggle;
 }
 
 void Assembly::sixBarControl(){
@@ -143,16 +151,15 @@ void Assembly::toggleControl(){
     }
 }
 
-// Smallest bounding box (pixels^2) that counts as the toggle, so stray specks of color are ignored.
+// Smallest bounding box that counts as the toggle, tuned so stray specks of color are ignored.
 static const int toggle_min_area = 35000;
 
-// Max time (ms) a toggle flip may spin before giving up and moving on with the auton.
+// Max time a toggle flip may spin before giving up and moving on with the auton.
 static const int toggle_flip_timeout_ms = 1500;
 
-// For autons. Spins the toggle until the camera sees red, then stops and holds.
-// Yellow, blue, or nothing in view (mid-flip) all keep it spinning.
+//Spins the toggle until the camera sees red, then stops and holds.
 void Assembly::flip_toggle_to_red() {
-    vex::timer flip_timer;  // gives up after toggle_flip_timeout_ms so a missing/mistuned camera can't stall the auton
+    vex::timer flip_timer;  // gives up after toggle_flip_timeout_ms so camera can't stall the auton
     while (!(ai_vision.takeSnapshot(red_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
         if (flip_timer.time(msec) >= toggle_flip_timeout_ms) break;
         toggle.spin(fwd, 12, volt);
@@ -161,19 +168,9 @@ void Assembly::flip_toggle_to_red() {
     toggle.stop();
 }
 
-// For autons. Spins the toggle until the camera sees blue, then stops and holds.
-// Yellow, red, or nothing in view (mid-flip) all keep it spinning.
-// void Assembly::flip_toggle_to_blue() {
-//     while (!(ai_vision.takeSnapshot(blue_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
-//         toggle.spin(fwd, 12, volt);
-//         claw.open();
-//         vex::task::sleep(20);
-//     }
-//     toggle.stop();
-// }
-
+// Spins the toggle until the camera sees blue, then stops and holds
 void Assembly::flip_toggle_to_blue() {
-    vex::timer flip_timer;  // gives up after toggle_flip_timeout_ms so a missing/mistuned camera can't stall the auton
+    vex::timer flip_timer;  // gives up after toggle_flip_timeout_ms so camera can't stall the auton
     while (!(ai_vision.takeSnapshot(blue_toggle, 6) > 0 && ai_vision.objects[0].width * ai_vision.objects[0].height >= toggle_min_area)) {
         if (flip_timer.time(msec) >= toggle_flip_timeout_ms) break;
         toggle.spin(fwd, 12, volt);
@@ -183,152 +180,108 @@ void Assembly::flip_toggle_to_blue() {
 }
 
 
-// ---------------- Claw motor ----------------
-// Open: spins forward and never stops.
-// Closed: spins reverse for claw_close_ms, then stops (holding) so it isn't stalled the whole match.
-// grab/release/X change the direction; a new command restarts the close timer.
-static const double claw_volts    = 12;    // voltage the claw spins at
-static const int    claw_close_ms = 1500;  // how long reverse (close) spins before stopping
+// ---------------- Auto-clamp ----------------
+// Closes the claw when the clamp distance sensor sees something right at the clamp.
+// Runs as a background task during autons, alongside the normal claw.open()/claw.close() calls.
+//
+// ARMED    -> object within clamp_trigger_mm for clamp_trigger_ms while claw is open -> close claw, DISARM
+// DISARMED -> nothing within clamp_rearm_mm for clamp_rearm_ms -> ARM again
+// Also disarms whenever the claw is closed on something (e.g. a preload or an auton claw.close()),
+// so opening the claw to drop that object never re-grabs it.
+// Auto-clamp only ever closes the claw, never opens it.
 
-static bool claw_open_state = true;   // claw starts physically open at power-on
-static bool claw_close_done = false;  // true once reverse has run its claw_close_ms and stopped
-static int  claw_move_id = 0;         // bumps on every command, so an old timer can't stop a newer move
+static const double clamp_trigger_mm = 50;    // clamp when object is this close (mm)
+static const double clamp_rearm_mm   = 120;   // re-arm once object is farther than this (mm)
+static const int    clamp_trigger_ms = 20;    // object must stay close this long before clamping
+static const int    clamp_rearm_ms   = 300;   // must stay clear this long before re-arming
+static const int    clamp_loop_ms    = 10;
 
-static void claw_spin() {
-    if (claw_open_state) {
-        Assembly::claw.spin(fwd, claw_volts, volt);
-    } else if (!claw_close_done) {
-        Assembly::claw.spin(reverse, claw_volts, volt);
+// claw.open() physically closes the claw (piston is plumbed backwards), so these swap them.
+void Assembly::claw_grab()    { claw.open(); }
+void Assembly::claw_release() { claw.close(); }
+bool Assembly::claw_is_open() { return !claw.state(); }
+
+bool Assembly::wait_for_clamp(int timeout_ms) {
+    vex::timer t;
+    while (claw_is_open() && t.time(msec) < timeout_ms) {
+        vex::task::sleep(10);
     }
+    if (claw_is_open()) {
+        claw_grab();  // sensor didn't see it in time: grab anyway
+        return false;
+    }
+    return true;
 }
 
-// Background timer: stops the reverse spin after claw_close_ms, unless a newer command replaced it.
-static int claw_stop_after_close(void* arg) {
-    int my_id = (int)(intptr_t)arg;
-    vex::task::sleep(claw_close_ms);
-    if (my_id == claw_move_id) {
-        claw_close_done = true;
-        Assembly::claw.stop(vex::brakeType::hold);
+static vex::task auto_clamp_task;
+static bool auto_clamp_running = false;
+static volatile bool auto_clamp_arm_request = false;  // set by arm_auto_clamp(), read by the loop
+
+void Assembly::arm_auto_clamp() { auto_clamp_arm_request = true; }
+
+static int auto_clamp_loop() {
+    auto_clamp_arm_request = false;  // ignore requests left over from a previous run
+    bool armed = true;
+    int close_time = 0;
+    int clear_time = 0;
+
+    while (true) {
+        bool detected = Assembly::clamp_distance.isObjectDetected();
+        double dist = Assembly::clamp_distance.objectDistance(vex::distanceUnits::mm);
+        bool object_close = detected && dist <= clamp_trigger_mm;
+        bool object_clear = !detected || dist > clamp_rearm_mm;
+        bool claw_open = Assembly::claw_is_open();
+
+        if (auto_clamp_arm_request) {
+            // Auton says we've left the last goal: arm now instead of waiting to see clear
+            auto_clamp_arm_request = false;
+            armed = true;
+            close_time = 0;
+            clear_time = 0;
+        }
+
+        if (!claw_open && !object_clear) {
+            // Claw is holding something: don't re-grab it when it gets opened
+            armed = false;
+        }
+
+        if (armed) {
+            if (object_close && claw_open) {
+                close_time += clamp_loop_ms;
+                if (close_time >= clamp_trigger_ms) {
+                    Assembly::claw_grab();
+                    Controller.rumble(".");  // feedback so you can tell auto-clamp fired
+                    armed = false;
+                    close_time = 0;
+                    clear_time = 0;
+                }
+            } else {
+                close_time = 0;
+            }
+        } else {
+            if (object_clear) {
+                clear_time += clamp_loop_ms;
+                if (clear_time >= clamp_rearm_ms) {
+                    armed = true;
+                    clear_time = 0;
+                }
+            } else {
+                clear_time = 0;
+            }
+        }
+
+        vex::task::sleep(clamp_loop_ms);
     }
     return 0;
 }
 
-static void claw_move(bool open) {
-    claw_open_state = open;
-    claw_close_done = false;
-    claw_move_id++;
-    claw_spin();
-    if (!open) {
-        vex::task(claw_stop_after_close, (void*)(intptr_t)claw_move_id);
-    }
+void Assembly::start_auto_clamp() {
+    if (auto_clamp_running) auto_clamp_task.stop();
+    auto_clamp_task = vex::task(auto_clamp_loop);
+    auto_clamp_running = true;
 }
 
-void Assembly::claw_grab()    { claw_move(true); }   // spins forward nonstop
-void Assembly::claw_release() { claw_move(false); }  // spins reverse for claw_close_ms, then stops
-void Assembly::claw_toggle()  { claw_move(!claw_open_state); }
-bool Assembly::claw_is_open() { return claw_open_state; }
-void Assembly::claw_keep_spinning() { claw_spin(); }
-
-
-// Auto-clamp (clamp distance sensor) is disabled: commented out below.
-// // ---------------- Auto-clamp ----------------
-// // Closes the claw when the clamp distance sensor sees something right at the clamp.
-// // Runs as a background task during autons, alongside the normal claw_grab()/claw_release() calls.
-// //
-// // ARMED    -> object within clamp_trigger_mm for clamp_trigger_ms while claw is open -> close claw, DISARM
-// // DISARMED -> nothing within clamp_rearm_mm for clamp_rearm_ms -> ARM again
-// // Also disarms whenever the claw is closed on something (e.g. a preload or an auton claw_grab()),
-// // so opening the claw to drop that object never re-grabs it.
-// // Auto-clamp only ever closes the claw, never opens it.
-
-// static const double clamp_trigger_mm = 50;    // clamp when object is this close (mm)
-// static const double clamp_rearm_mm   = 120;   // re-arm once object is farther than this (mm)
-// static const int    clamp_trigger_ms = 20;    // object must stay close this long before clamping
-// static const int    clamp_rearm_ms   = 300;   // must stay clear this long before re-arming
-// static const int    clamp_loop_ms    = 10;
-
-
-// bool Assembly::wait_for_clamp(int timeout_ms) {
-//     vex::timer t;
-//     while (claw_is_open() && t.time(msec) < timeout_ms) {
-//         vex::task::sleep(10);
-//     }
-//     if (claw_is_open()) {
-//         claw_grab();  // sensor didn't see it in time: grab anyway
-//         return false;
-//     }
-//     return true;
-// }
-
-// static vex::task auto_clamp_task;
-// static bool auto_clamp_running = false;
-// static volatile bool auto_clamp_arm_request = false;  // set by arm_auto_clamp(), read by the loop
-
-// void Assembly::arm_auto_clamp() { auto_clamp_arm_request = true; }
-
-// static int auto_clamp_loop() {
-//     auto_clamp_arm_request = false;  // ignore requests left over from a previous run
-//     bool armed = true;
-//     int close_time = 0;
-//     int clear_time = 0;
-
-//     while (true) {
-//         bool detected = Assembly::clamp_distance.isObjectDetected();
-//         double dist = Assembly::clamp_distance.objectDistance(vex::distanceUnits::mm);
-//         bool object_close = detected && dist <= clamp_trigger_mm;
-//         bool object_clear = !detected || dist > clamp_rearm_mm;
-//         bool claw_open = Assembly::claw_is_open();
-
-//         if (auto_clamp_arm_request) {
-//             // Auton says we've left the last goal: arm now instead of waiting to see clear
-//             auto_clamp_arm_request = false;
-//             armed = true;
-//             close_time = 0;
-//             clear_time = 0;
-//         }
-
-//         if (!claw_open && !object_clear) {
-//             // Claw is holding something: don't re-grab it when it gets opened
-//             armed = false;
-//         }
-
-//         if (armed) {
-//             if (object_close && claw_open) {
-//                 close_time += clamp_loop_ms;
-//                 if (close_time >= clamp_trigger_ms) {
-//                     Assembly::claw_grab();
-//                     Controller.rumble(".");  // feedback so you can tell auto-clamp fired
-//                     armed = false;
-//                     close_time = 0;
-//                     clear_time = 0;
-//                 }
-//             } else {
-//                 close_time = 0;
-//             }
-//         } else {
-//             if (object_clear) {
-//                 clear_time += clamp_loop_ms;
-//                 if (clear_time >= clamp_rearm_ms) {
-//                     armed = true;
-//                     clear_time = 0;
-//                 }
-//             } else {
-//                 clear_time = 0;
-//             }
-//         }
-
-//         vex::task::sleep(clamp_loop_ms);
-//     }
-//     return 0;
-// }
-
-// void Assembly::start_auto_clamp() {
-//     if (auto_clamp_running) auto_clamp_task.stop();
-//     auto_clamp_task = vex::task(auto_clamp_loop);
-//     auto_clamp_running = true;
-// }
-
-// void Assembly::stop_auto_clamp() {
-//     if (auto_clamp_running) auto_clamp_task.stop();
-//     auto_clamp_running = false;
-// }
+void Assembly::stop_auto_clamp() {
+    if (auto_clamp_running) auto_clamp_task.stop();
+    auto_clamp_running = false;
+}
