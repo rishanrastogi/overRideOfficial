@@ -219,6 +219,8 @@ std::string blue_left_two_goalpin_standingpin(bool calibrate, auto_variation var
     wait(0.2,seconds);
 
     chassis.drive_distance(-10,{.min_voltage = 12});
+
+    return "";
 }
 
 
@@ -233,47 +235,47 @@ std::string red_right_two_goalpin(bool calibrate, auto_variation var, bool get_n
     }
     // assembly.toggle.setVelocity(100,percent);
     // assembly.toggle.spinFor(2.25,rev);
+    assembly.claw_grab(); // hold the preload
     assembly.toggle.setVelocity(100,percent);
     assembly.flip_toggle_to_red();
-
-    chassis.drive_distance(6.5);
-
     assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
+    chassis.drive_distance(6.5);
 
-    chassis.right_swing_to_angle(270); //swing into cup
-    chassis.drive_distance(7, {.timeout = 700});
+    chassis.right_swing_to_angle(270, {.timeout = 800}); //swing into cup
+    chassis.drive_distance(7, {.timeout = 600});
 
-    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
-    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
-    wait(0.1,seconds);
-    assembly.claw.open();
-    wait(0.75,seconds);
+    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 5, volt);
+    assembly.claw_release(); // drop preload on cup
 
     chassis.drive_distance(-2);
     wait(0.1,seconds);
     chassis.drive_distance(1.75);
     chassis.drive_distance(-8.5,{.heading=180});
     chassis.turn_to_angle(225);
+    assembly.arm_auto_clamp(); // armed before swinging into the wall
     chassis.drive_distance(18.75);
-    chassis.right_swing_to_angle(180,{.timeout = 500}); //get to side pin
-    chassis.drive_distance(1,{.timeout = 100});
-    assembly.claw.close();
-    wait(0.15,seconds);
-    
+    chassis.right_swing_to_angle(180,{.timeout = 700}); //get to side pin
+    chassis.drive_distance(1,{.max_voltage = 4, .timeout = 100});
+    assembly.wait_for_clamp(300); // auto-clamp grabs the pin; forces the grab after 300 ms
+
     assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
-    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt, false);
     chassis.turn_to_angle(260,{.timeout = 500});
     chassis.drive_distance(-16,{.heading=180});
-    chassis.turn_to_angle(270);
+    chassis.turn_to_angle(270, {.timeout = 600});
     chassis.drive_distance(9.4, {.timeout = 500}); //align with goal
-    
+
     assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
     assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
     wait(0.15,seconds);
-    assembly.claw.open();
+    assembly.claw_release();
     wait(0.1,seconds); //drop stack on
-    chassis.drive_distance(-10, {.heading=270});
+    chassis.drive_distance(-7, {.heading=270});
+    chassis.left_swing_to_angle(180, {.timeout = 800});
+    chassis.drive_distance(-18, {.heading = 180});
+    chassis.right_swing_to_angle(160, {.timeout = 800});
 
     // chassis.drive_distance(-6, {.heading=90});
     // chassis.turn_to_angle(241);
@@ -384,6 +386,19 @@ std::string blue_left_elim(bool calibrate, auto_variation var, bool get_name) {
     return "";
 }
 
+
+// PLACEHOLDER: blue right two goalpin auton isn't written yet (does nothing). Needed so the project links.
+std::string blue_right_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
+    if (get_name) return "blue right two goalpin (empty)";
+
+    if (calibrate) {
+        chassis.set_coordinates(-66.013, -8.701, 0);
+
+        return "";
+    }
+
+    return "";
+}
 
 //old standing pin far side code
 // std::string blue_right_two_goalpin(bool calibrate, auto_variation var, bool get_name) {
