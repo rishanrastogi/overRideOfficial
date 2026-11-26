@@ -238,44 +238,62 @@ std::string red_right_two_goalpin(bool calibrate, auto_variation var, bool get_n
     assembly.claw_grab(); // hold the preload
     assembly.toggle.setVelocity(100,percent);
     assembly.flip_toggle_to_red();
-    assembly.sixbar_left.spinFor(fwd, 0.25, rev, 6, volt, false);
-    assembly.sixbar_right.spinFor(reverse, 0.25, rev, 6, volt, false);
-    chassis.drive_distance(6.5);
+    assembly.sixbar_left.spinFor(fwd, 0.15, rev, 6, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.15, rev, 6, volt, false);
+    chassis.drive_distance(7);
 
     chassis.right_swing_to_angle(270, {.timeout = 800}); //swing into cup
     chassis.drive_distance(7, {.timeout = 600});
 
-    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 5, volt, false);
-    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 5, volt);
+    chassis.drive_distance(-0.5);
+    assembly.sixbar_left.spinFor(reverse, 0.20, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.20, rev, 3.5, volt);
     assembly.claw_release(); // drop preload on cup
+    wait(0.2,seconds);
 
-    chassis.drive_distance(-2);
-    wait(0.1,seconds);
-    chassis.drive_distance(1.75);
+    // chassis.drive_distance(-1.5);
+    // wait(0.1,seconds);
+    // chassis.drive_distance(1.75);
     chassis.drive_distance(-8.5,{.heading=180});
-    chassis.turn_to_angle(225);
+    chassis.turn_to_angle(225, {.timeout = 450});
     assembly.arm_auto_clamp(); // armed before swinging into the wall
-    chassis.drive_distance(18.75);
+    chassis.drive_distance(19, {.timeout = 800});
     chassis.right_swing_to_angle(180,{.timeout = 700}); //get to side pin
     chassis.drive_distance(1,{.max_voltage = 4, .timeout = 100});
-    assembly.wait_for_clamp(300); // auto-clamp grabs the pin; forces the grab after 300 ms
+    assembly.wait_for_clamp(200); // auto-clamp grabs the pin; forces the grab after 300 ms
 
     assembly.sixbar_left.spinFor(fwd, 0.45, rev, 6, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt, false);
     chassis.turn_to_angle(260,{.timeout = 500});
-    chassis.drive_distance(-16,{.heading=180});
+    chassis.drive_distance(-16,{.heading = 180});
     chassis.turn_to_angle(270, {.timeout = 600});
     chassis.drive_distance(9.4, {.timeout = 500}); //align with goal
 
-    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
-    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
-    wait(0.15,seconds);
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
     assembly.claw_release();
-    wait(0.1,seconds); //drop stack on
-    chassis.drive_distance(-7, {.heading=270});
-    chassis.left_swing_to_angle(180, {.timeout = 800});
-    chassis.drive_distance(-18, {.heading = 180});
-    chassis.right_swing_to_angle(160, {.timeout = 800});
+    chassis.drive_distance(-4, {.heading=270});
+    chassis.drive_distance(-25, {.min_voltage = 8, .heading = 180});
+
+    chassis.right_swing_to_angle(168, {.timeout = 400});
+    chassis.drive_distance(24.5);
+    assembly.arm_auto_clamp(); // armed before swinging into the wall
+    chassis.right_swing_to_angle(130, {.timeout = 500});
+    chassis.drive_distance(5);
+    chassis.left_swing_to_angle(180, {.timeout = 500});
+    chassis.drive_distance(3,{.max_voltage = 4, .timeout = 300});
+    assembly.wait_for_clamp(200); // auto-clamp grabs the pin; forces the grab after 300 ms
+
+    assembly.sixbar_left.spinFor(fwd, 0.45, rev, 7, volt, false);
+    assembly.sixbar_right.spinFor(reverse, 0.45, rev, 7, volt, false);
+    chassis.drive_distance(-1, {.min_voltage = 12, .timeout = 100});
+    chassis.turn_to_angle(0, {.min_voltage = 12, .timeout = 1000});
+    chassis.drive_distance(100, {.min_voltage = 12, .wait = false, .timeout = 1000});
+    wait(0.2, seconds);
+    assembly.sixbar_left.spinFor(reverse, 0.5, rev, 5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.5, rev, 5, volt);
+    assembly.claw_release();
+
 
     // chassis.drive_distance(-6, {.heading=90});
     // chassis.turn_to_angle(241);
