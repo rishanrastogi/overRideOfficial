@@ -101,8 +101,8 @@ void Assembly::control() {
 // When the driver clamps and the clamp distance sensor sees something in the claw,
 // the six-bar lifts a little so the object clears the ground.
 static const double lift_bump_detect_mm = 25;    // object must be this close to count as "in the claw" (mm)
-static const double lift_bump_revs      = 0.05;  // how far to raise the lift (motor revs, same units as autons)
-static const double lift_bump_volts     = 10;     // how hard to raise it
+static const double lift_bump_revs      = 0.1;  // how far to raise the lift (motor revs, same units as autons)
+static const double lift_bump_volts     = 8;     // how hard to raise it
 static bool lift_bump_active = false;            // true while the bump is moving; R1/R2 cancel it
 
 static void start_lift_bump() {

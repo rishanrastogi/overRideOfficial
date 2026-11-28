@@ -230,14 +230,13 @@ std::string red_right_two_goalpin(bool calibrate, auto_variation var, bool get_n
 
     if (calibrate) {
         chassis.set_coordinates(-66.013, -8.701, 0);
-
+        assembly.claw_grab();
         return "";
     }
     // assembly.toggle.setVelocity(100,percent);
     // assembly.toggle.spinFor(2.25,rev);
-    assembly.claw_grab(); // hold the preload
     assembly.toggle.setVelocity(100,percent);
-    assembly.flip_toggle_to_blue();
+    assembly.flip_toggle_to_red();
     assembly.sixbar_left.spinFor(fwd, 0.20, rev, 6, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.20, rev, 6, volt, false);
     chassis.drive_distance(7.25);
@@ -270,16 +269,15 @@ std::string red_right_two_goalpin(bool calibrate, auto_variation var, bool get_n
     assembly.sixbar_left.spinFor(reverse, 0.35, rev, 4, volt, false);
     assembly.sixbar_right.spinFor(fwd, 0.35, rev, 4, volt);
     assembly.claw_release();
-    chassis.drive_distance(-4, {.heading=270});
-    chassis.drive_distance(-27.5, {.min_voltage = 10, .heading = 180});
+    chassis.drive_distance(-4, {.heading=270, .timeout = 500});
+    chassis.drive_distance(-29.5, {.min_voltage = 12, .heading = 180, .timeout = 1300});
 
-    chassis.right_swing_to_angle(168, {.timeout = 400});
-    chassis.drive_distance(25);
+    chassis.drive_distance(27, {.min_voltage = 8, .heading = 168});
     assembly.arm_auto_clamp(); // armed before swinging into the wall
     chassis.right_swing_to_angle(130, {.timeout = 500});
-    chassis.drive_distance(4);
+    chassis.drive_distance(6);
     chassis.left_swing_to_angle(180, {.timeout = 500});
-    chassis.drive_distance(3,{.max_voltage = 4, .timeout = 300});
+    chassis.drive_distance(3, {.max_voltage = 4, .timeout = 300});
     assembly.wait_for_clamp(200); // auto-clamp grabs the pin; forces the grab after 300 ms
 
     assembly.sixbar_left.spinFor(fwd, 0.45, rev, 7, volt, false);
@@ -672,16 +670,16 @@ std::string red_right_elim(bool calibrate, auto_variation var, bool get_name) {
 }
 // Copy of skills with drivetrain, sixbar and toggle only. No claw or auto-clamp.
 std::string skills(bool calibrate, auto_variation var, bool get_name) {
-    if (get_name) return "skills no clamp";
+    if (get_name) return "skills";
 
     if (calibrate) {
         chassis.set_coordinates(0,0,0);
+        assembly.claw_grab();
         return "";
     }
 
     assembly.toggle.setVelocity(100,percent);
     assembly.flip_toggle_to_red();
-    assembly.claw_grab();
     assembly.sixbar_left.spinFor(fwd, 0.15, rev, 6, volt, false);
     assembly.sixbar_right.spinFor(reverse, 0.15, rev, 6, volt, false);
 
@@ -690,16 +688,17 @@ std::string skills(bool calibrate, auto_variation var, bool get_name) {
     assembly.sixbar_right.spinFor(reverse, 0.15, rev, 6, volt, false);
     chassis.left_swing_to_angle(90, {.timeout = 650}); //swing into cup
     chassis.drive_distance(7.5, {.max_voltage = 12, .timeout = 750});
-    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3.5, volt, false);
-    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3.5, volt);
+    chassis.drive_distance(-1.5);
+    assembly.sixbar_left.spinFor(reverse, 0.35, rev, 3.5, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.35, rev, 3.5, volt);
     assembly.claw_release();
     wait(0.1,seconds);
     wait(0.1,seconds);
 
     chassis.drive_distance(-6,{.heading = 90});
     assembly.arm_auto_clamp();
-    chassis.turn_to_point(19.625, 38.348);
-    chassis.drive_distance(19);
+    chassis.turn_to_point(21, 38.348);
+    chassis.drive_distance(18);
     chassis.drive_distance(5,{.max_voltage = 2.5});
     assembly.wait_for_clamp(200);
 
@@ -707,17 +706,18 @@ std::string skills(bool calibrate, auto_variation var, bool get_name) {
     assembly.sixbar_right.spinFor(reverse, 0.45, rev, 6, volt, false);
     chassis.turn_to_point(19.625, 24.098);
     chassis.drive_distance(15,{.max_voltage = 8, .timeout = 1000});
+    chassis.drive_distance(-0.75);
 
-    assembly.sixbar_left.spinFor(reverse, 0.30, rev, 3, volt, false);
-    assembly.sixbar_right.spinFor(fwd, 0.30, rev, 3, volt);
+    assembly.sixbar_left.spinFor(reverse, 0.55, rev, 3, volt, false);
+    assembly.sixbar_right.spinFor(fwd, 0.55, rev, 3, volt);
     assembly.claw_release();
     wait(0.1,seconds);
     wait(0.1,seconds);
 
     chassis.drive_distance(-12,{.heading=90});
     assembly.arm_auto_clamp();
-    chassis.turn_to_point(32.795, 20.668);
-    chassis.drive_to_point(32.795, 20.668);
+    chassis.turn_to_point(32.795, 18.668);
+    chassis.drive_to_point(32.795, 18.668);
     chassis.drive_distance(5,{.max_voltage = 4});
     assembly.wait_for_clamp(200);
 
@@ -791,9 +791,21 @@ std::string skills(bool calibrate, auto_variation var, bool get_name) {
     // chassis.drive_to_point(-10, 60);
     // assembly.toggle.spinFor(3, rev);
     
+    // DELETE ALL THIS AFTER GRASSROOTS
+    chassis.set_coordinates(0, 0, chassis.get_absolute_heading()); // RESET THE COORDS ONCE IN THE LOADER, keep current heading
+    chassis.drive_to_point(0,12, {.direction = reverse});
+    chassis.turn_to_angle(270);
+    assembly.sixbar_left.spinFor(fwd, 0.4+(0.1*4), rev, 6, volt, false); // lift the match load
+    assembly.sixbar_right.spinFor(reverse, 0.4+(0.1*4), rev, 6, volt, false);
+    chassis.drive_distance(20, {.heading = 270});
+    chassis.drive_distance(10, {.max_voltage = 6, .heading = 270, .timeout = 1000});
+    assembly.sixbar_left.spinFor(reverse, 0.4+(0.1*4), rev, 6, volt, false); // lower the arm back down
+    assembly.sixbar_right.spinFor(fwd, 0.4+(0.1*4), rev, 6, volt);
+    assembly.claw_release();
+    wait(0.2,seconds);
     chassis.drive_distance(-10);
     chassis.turn_to_angle(315);
-    chassis.drive_distance(50);
+    chassis.drive_distance(65);
 
     return "";
 }
