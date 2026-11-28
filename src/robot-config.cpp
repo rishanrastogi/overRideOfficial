@@ -62,7 +62,7 @@ mik::motor Assembly::sixbar_motorR2(PORT15, false, green_18_1	, "sixbar_motorR")
 mik::motor_group Assembly::sixbar_right(std::vector<mik::motor*>{&sixbar_motorR1, &sixbar_motorR2});
 mik::motor_group Assembly::sixbar_left(std::vector<mik::motor*>{&sixbar_motorL1, &sixbar_motorL2});	
 
-mik::motor Assembly::toggle(PORT8, false, green_18_1, "toggle_motor");
+mik::motor Assembly::toggle(PORT6, false, green_18_1, "toggle_motor");
 
 // Distance sensor on the clamp
 vex::distance Assembly::clamp_distance(PORT7);

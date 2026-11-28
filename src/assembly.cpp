@@ -97,7 +97,21 @@ void Assembly::control() {
 //     }
 // }
 
-// Up opens the claw, Down closes it, B flips whichever state it is in.
+// ---------------- Driver lift bump ----------------
+// When the driver clamps and the clamp distance sensor sees something in the claw,
+// the six-bar lifts a little so the object clears the ground.
+static const double lift_bump_detect_mm = 25;    // object must be this close to count as "in the claw" (mm)
+static const double lift_bump_revs      = 0.05;  // how far to raise the lift (motor revs, same units as autons)
+static const double lift_bump_volts     = 10;     // how hard to raise it
+static bool lift_bump_active = false;            // true while the bump is moving; R1/R2 cancel it
+
+static void start_lift_bump() {
+    Assembly::sixbar_left.spinFor(fwd, lift_bump_revs, rev, lift_bump_volts, volt, false);
+    Assembly::sixbar_right.spinFor(reverse, lift_bump_revs, rev, lift_bump_volts, volt, false);
+    lift_bump_active = true;
+}
+
+// Up opens the claw, Down closes it, X flips whichever state it is in.
 // Each acts on the press itself, and the solenoid latches, so the claw stays
 // where it was last commanded instead of needing a button held down.
 void Assembly::clawControl() {
@@ -111,6 +125,8 @@ void Assembly::clawControl() {
     bool down = Controller.ButtonDown.pressing();
     bool toggle = Controller.ButtonX.pressing();
 
+    bool was_open = claw_is_open();
+
     if (up && !prev_up) {
         claw.open();
     } else if (down && !prev_down) {
@@ -119,12 +135,30 @@ void Assembly::clawControl() {
         claw.toggle();
     }
 
+    // Driver just clamped: if something is actually in the claw, lift it slightly
+    if (was_open && !claw_is_open()) {
+        bool in_claw = clamp_distance.isObjectDetected() &&
+                       clamp_distance.objectDistance(vex::distanceUnits::mm) <= lift_bump_detect_mm;
+        if (in_claw) start_lift_bump();
+    }
+
     prev_up = up;
     prev_down = down;
     prev_toggle = toggle;
 }
 
 void Assembly::sixBarControl(){
+    // Let a lift bump finish unless the driver takes over with R1/R2
+    if (lift_bump_active) {
+        bool driver_input = Controller.ButtonR1.pressing() || Controller.ButtonR2.pressing();
+        bool done = sixbar_left.isDone() && sixbar_right.isDone();
+        if (driver_input || done) {
+            lift_bump_active = false;
+        } else {
+            return;
+        }
+    }
+
     if (Controller.ButtonR1.pressing()) {
         sixbar_left.spin(fwd, 12, volt);
         sixbar_right.spin(reverse, 12, volt);
